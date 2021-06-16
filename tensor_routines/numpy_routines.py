@@ -356,7 +356,7 @@ def iso_ev(a: np.ndarray) -> np.ndarray:
 
     Compute for a given second- or fourth-order tensor the 
     eigenvalues of the isotropic part of the given tensor `a`
-        * For second-order tensors for `a = lambda I_2 + aniso_part`, 
+        * For second-order tensors for `a = lambda ID_2 + aniso_part`, 
         `lambda` is computed.
         * For fourth-order tensors `a = sum_{i=1}^3 lambda_i P_ISOi + aniso_part`,
         the lambda_i are computed.
@@ -386,7 +386,7 @@ def iso_ev(a: np.ndarray) -> np.ndarray:
         return np.array([sp(a, P)/sp(P, P) for P in P_ISO])
     else:
         # Second-order
-        return sp(a, I_2)/3
+        return sp(a, ID_2)/3
 
 def iso_t(l: np.ndarray) -> np.ndarray:
     """Isotropic tensor.
@@ -397,7 +397,7 @@ def iso_t(l: np.ndarray) -> np.ndarray:
     Parameters
     ----------
     l : float or np.ndarray
-        * Second order: float corresponding to lambda for lambda I_2
+        * Second order: float corresponding to lambda for lambda ID_2
         * Fourth order: 1D-array = [lambda_1,2|3] for sum_{i=1}^3 lambda_i P_ISO_i
             * [lambda_1, lambda_2] for only two first isotropic projects
             * [lambda_1,2,3] for all isotropic projectors
@@ -422,7 +422,7 @@ def iso_t(l: np.ndarray) -> np.ndarray:
             return l[0]*P_ISO_1 + l[1]*P_ISO_2 + l[2]*P_ISO_3
     else:
         # Second-order
-        return l*I_2
+        return l*ID_2
 
 def iso_proj(a: np.ndarray) -> np.ndarray:
     """Isotropic projection.
@@ -765,7 +765,7 @@ def rotation_matrix(n: np.ndarray, phi: float) -> np.ndarray:
     """
     n = np.array(n)
     n = n/nf(n)
-    n0 = np.cos(phi)*I_2
+    n0 = np.cos(phi)*ID_2
     n1 = -np.sin(phi)*lm(PT,n)
     n2 = (1 - np.cos(phi))*tp(n,n)
     return n0 + n1 + n2
@@ -775,8 +775,10 @@ def rotation_matrix(n: np.ndarray, phi: float) -> np.ndarray:
 # Scalars
 SR2 = np.sqrt(2)
 
-# Tensors
-I_2 = np.eye(3)
+# Identity on vectors
+ID_2 = np.eye(3)
+
+# Permutation tensor
 PT = np.zeros((3,3,3))
 PT[0,1,2] = 1
 PT[1,2,0] = 1
@@ -784,7 +786,9 @@ PT[2,0,1] = 1
 PT[1,0,2] = -1
 PT[2,1,0] = -1
 PT[0,2,1] = -1
-ITI = tp(I_2, I_2)
+
+# Fourth-order
+ITI = tp(ID_2, ID_2)
 ID_4 = tt(ITI, (0, 2, 1, 3))
 ID_S = sym_r(ID_4)
 ID_A = ID_4 - ID_S
