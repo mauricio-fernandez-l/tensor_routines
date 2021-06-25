@@ -15,7 +15,7 @@ def test_rp():
     # First order
     a = ts.t(1)
     q = ts.t(2, "q")
-    assert spy.simplify()
+    assert ts.rp(q, a).tomatrix() == q.tomatrix()*ts.vec(a)
     # Second order
     a = ts.t(2)
     q = ts.t(2, "q")

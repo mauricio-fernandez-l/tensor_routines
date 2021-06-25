@@ -40,61 +40,85 @@ def t(n: int, s: str = "a", dims: list=None) -> spy.Array:
 # %% Transform
 
 def flatten(a: spy.Array) -> spy.Array:
+    """Flatten tensor
+
+    Parameters
+    ----------
+    a : spy.Array
+        Tensor
+
+    Returns
+    -------
+    spy.Array
+        Flattened tensor (row vector)
+    """
     return a.reshape(spy.prod(a.shape))
 
 
 def vec(a: spy.Array) -> spy.Matrix:
+    """Column vector representation of tensor
+
+    Parameters
+    ----------
+    a : spy.Array
+        Tensor
+
+    Returns
+    -------
+    spy.Matrix
+        Tensor as vector in R^{n x 1}
+    """
     return a.reshape(spy.prod(a.shape), 1).tomatrix()
-
-
-def nvn(a: spy.Array) -> spy.Matrix:
-    convention = [[0, 0], [1, 1], [2, 2], [1, 2], [0, 2], [0,1]]
-    if a.shape == (3, 3):
-        out = spy.Matrix([
-            a[0, 0],
-            a[1, 1],
-            a[2, 2],
-            a[1, 2]*SR2,
-            a[0, 2]*SR2,
-            a[0, 1]*SR2
-        ])
-    else:
-        out = spy.eye(6)
-        for i_1 in range(6):
-            for i_2 in range(6):
-                out[i_1, i_2] = a[
-                    convention[i_1][0],
-                    convention[i_1][1],
-                    convention[i_2][0],
-                    convention[i_2][1]
-                ]
-                if i_1 > 2:
-                    out[i_1, i_2] *= SR2
-                if i_2 > 2:
-                    out[i_1, i_2] *= SR2
-    return out
-
-
-def nvn_inv(a: spy.Array) -> spy.Array:
-    #TODO
-    pass
-
-
-def inv_nvn(a: spy.Array) -> spy.Array:
-    # TODO
-    pass
 
 
 # %% Products
 
 def sp(
     a: spy.Array, 
-    b:spy.Array
+    b: spy.Array
     ):
+    """Scalar product.
+    
+    Compute the scalar product (full contraction) of
+    tensors with equal shape.
+
+    Parameters
+    ----------
+    a : spy.Array
+        Tensor
+    b : spy.Array
+        Tensor with b.shape == a.shape
+
+    Returns
+    -------
+    scalar
+        a_ijkl... b_ijkl...
+
+    Examples
+    --------
+    >>> a = t(3, "a", [2, 3, 4])
+    ... b = t(3, "b", [2, 3, 4])
+    ... c = sp(a, b) # c = a_ijk b_ijk
+    """
     return vec(a).dot(vec(b))
 
 
 def nf(a: spy.Array):
+    """Frobenius norm.
+    
+    Frobenius norm of a real-valued tensor (square 
+    root of the sum of all squared tensor components).
+
+    Parameters
+    ----------
+    a : spy.Array
+        Tensor
+
+    Returns
+    -------
+    scalar
+        Frobenius norm    
+    """
     return vec(a).norm()
 
 
@@ -127,7 +151,7 @@ def lm(a: spy.Array, b: spy.Array):
 def rp(q: spy.Array, a: spy.Array):
     ra = a.rank()
     if ra == 1:
-        return spy.Array(q.tomatrix()*spy.Matrix(a))
+        return spy.Array(q.tomatrix()*vec(a))
     else:
         con = (1, ra + 2 - 1)
         temp = tc(tp(q, a), con)
@@ -237,7 +261,154 @@ def sym_lr(a: spy.Array) -> spy.Array:
     return sym_r(sym_l(a))
 
 
-#%% Rotations
+# %% Normalized Voigt notation (NOT Voigt notation)
+
+def nvn(a: spy.Array) -> spy.Matrix:
+    """Normalized Voigt notation.
+
+    Return the symmetric second- or minor symmetric fourth-order tensor 
+    `a` in normalized Voigt notation according to the convention 
+    (Python indices):
+
+        * [0, 0] 
+        * [1, 1] 
+        * [2, 2] 
+        * sqrt(2)*[1, 2] 
+        * sqrt(2)*[0, 2] 
+        * sqrt(2)*[0, 1]
+
+    The norm of the returned objects corresponds to the actual Frobenius
+    norm of the original tensors. For fourth-order tensors, the inverse
+    of the returned matrix corresponds to the `nvn` of the inverse of `a`
+    (with respect to the linear map on symmetric second-order tensors).
+
+    Parameters
+    ----------
+    a : spy.Array
+        * Second order: a.shape == (3, 3) and symmetric
+        * Fourth order: a.shape == (3, 3, 3, 3) and minor symmetric, i.e., a == sym_lr(a)
+
+    Returns
+    -------
+    spy.Array
+        * Second order: 6D vector representation
+        * Fourth order: 6x6 matrix representation
+    """
+    convention = [[0, 0], [1, 1], [2, 2], [1, 2], [0, 2], [0, 1]]
+    if a.shape == (3, 3):
+        out = spy.Matrix([
+            a[0, 0],
+            a[1, 1],
+            a[2, 2],
+            a[1, 2]*SR2,
+            a[0, 2]*SR2,
+            a[0, 1]*SR2
+        ])
+    else:
+        out = spy.eye(6)
+        for i_1 in range(6):
+            for i_2 in range(6):
+                out[i_1, i_2] = a[
+                    convention[i_1][0],
+                    convention[i_1][1],
+                    convention[i_2][0],
+                    convention[i_2][1]
+                ]
+                if i_1 > 2:
+                    out[i_1, i_2] *= SR2
+                if i_2 > 2:
+                    out[i_1, i_2] *= SR2
+    return out
+
+
+def nvn_inv(a: spy.Array) -> spy.Array:
+    """Inverse of normalized Voigt notation.
+
+    Reconstruct symmetric second- or minor symmetric fourth-order
+    tensor from `nvn` representation.
+
+    Parameters
+    ----------
+    a : spy.Array
+        * 6D vector
+        * 6x6 second-order tensor
+
+    Returns
+    -------
+    spy.Array
+        * symmetric 3x3 second-order tensor
+        * minor symmetric 3x3x3x3x fourth-order tensor
+    """
+    convention = [[0, 0], [1, 1], [2, 2], [1, 2], [0, 2], [0, 1]]
+    if a.shape == (6, 1):
+        out = spy.Array([
+            a[0], a[5]/SR2, a[4]/SR2,
+            a[5]/SR2, a[1], a[3]/SR2,
+            a[4]/SR2, a[3]/SR2, a[2]
+            ]).reshape(3, 3)
+    else:
+        out = spy.MutableDenseNDimArray(np.zeros([3]*4))
+        for i_1 in range(6):
+            for i_2 in range(6):
+                temp = a[i_1, i_2]
+                if i_1 > 2:
+                    temp /= SR2
+                if i_2 > 2:
+                    temp /= SR2
+                out[
+                    convention[i_1][0],
+                    convention[i_1][1],
+                    convention[i_2][0],
+                    convention[i_2][1],
+                ] = temp
+                out[
+                    convention[i_1][1],
+                    convention[i_1][0],
+                    convention[i_2][0],
+                    convention[i_2][1],
+                ] = temp
+                out[
+                    convention[i_1][0],
+                    convention[i_1][1],
+                    convention[i_2][1],
+                    convention[i_2][0],
+                ] = temp
+                out[
+                    convention[i_1][1],
+                    convention[i_1][0],
+                    convention[i_2][1],
+                    convention[i_2][0],
+                ] = temp
+        out = out.as_immutable()
+    return out
+
+
+def inv_nvn(a: spy.Array) -> spy.Array:
+    """Compute inverse through nvn.
+
+    Compute inverse of minor symmetric fourth-order tensor
+    through `nvn`. The inverse applies only on symmetric
+    second-order tensors. 
+
+    Parameters
+    ----------
+    a : spy.Array
+        Fourth-order minor symmetrc tensor with a.shape == (3, 3, 3, 3)
+
+    Returns
+    -------
+    spy.Array
+        Inverse of `a` w.r.t. symmetric second-order tensors
+    """
+    a = nvn(a)
+    if a == a.T:
+        a = a.inv(method="CH")
+    else:
+        a = a.inv()
+    return nvn_inv(a)
+
+
+# %% Rotations
     
 def rotation_matrix(
     n: spy.Array, 
@@ -247,7 +418,7 @@ def rotation_matrix(
     return spy.cos(phi)*ID_2 - spy.sin(phi)*lm(PT, n) + (1-spy.cos(phi))*tp(n, n)
 
 
-#%% Harmonic tensors
+# %% Harmonic tensors
 
 def harmonic(n: int, s: str = "h") -> spy.Array:
     if n==0:

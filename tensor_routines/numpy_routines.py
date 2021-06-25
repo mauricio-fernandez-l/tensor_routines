@@ -475,14 +475,14 @@ def iso_inv(a: np.ndarray) -> np.ndarray:
         return iso_t(1/iso_ev(a))
 
 
-# %% Normalized Voigt notation (not Voigt notation)
+# %% Normalized Voigt notation (NOT Voigt notation)
 
 def nvn(a: np.ndarray) -> np.ndarray:
     """Normalized Voigt notation.
 
     Return the symmetric second- or minor symmetric fourth-order tensor 
     `a` in normalized Voigt notation according to the convention 
-    (indices in normal matrix form):
+    (Python indices):
 
         * [0, 0] 
         * [1, 1] 
@@ -508,7 +508,7 @@ def nvn(a: np.ndarray) -> np.ndarray:
         * Second order: 6D vector representation
         * Fourth order: 6x6 matrix representation
     """
-    convention = [[0, 0], [1, 1], [2, 2], [1, 2], [0, 2], [0,1]]
+    convention = [[0, 0], [1, 1], [2, 2], [1, 2], [0, 2], [0, 1]]
     if a.shape == (3, 3):
         out = np.array([
             a[0, 0],
@@ -552,7 +552,7 @@ def nvn_inv(a: np.ndarray) -> np.ndarray:
         * symmetric 3x3 second-order tensor
         * minor symmetric 3x3x3x3x fourth-order tensor
     """
-    convention = [[0, 0], [1, 1], [2, 2], [1, 2], [0, 2], [0,1]]
+    convention = [[0, 0], [1, 1], [2, 2], [1, 2], [0, 2], [0, 1]]
     if a.shape == (6,):
         out = np.array([
             a[0], a[5]/SR2, a[4]/SR2,
