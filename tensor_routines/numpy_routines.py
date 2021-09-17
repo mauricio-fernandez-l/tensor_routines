@@ -481,15 +481,8 @@ def nvn(a: np.ndarray) -> np.ndarray:
     """Normalized Voigt notation.
 
     Return the symmetric second- or minor symmetric fourth-order tensor 
-    `a` in normalized Voigt notation according to the convention 
-    (Python indices):
-
-        * [0, 0] 
-        * [1, 1] 
-        * [2, 2] 
-        * sqrt(2)*[1, 2] 
-        * sqrt(2)*[0, 2] 
-        * sqrt(2)*[0, 1]
+    `a` in normalized Voigt notation according to the convention defined
+    in the module by the constant NVN_CONVENTION.
 
     The norm of the returned objects corresponds to the actual Frobenius
     norm of the original tensors. For fourth-order tensors, the inverse
@@ -508,25 +501,24 @@ def nvn(a: np.ndarray) -> np.ndarray:
         * Second order: 6D vector representation
         * Fourth order: 6x6 matrix representation
     """
-    convention = [[0, 0], [1, 1], [2, 2], [1, 2], [0, 2], [0, 1]]
     if a.shape == (3, 3):
         out = np.array([
-            a[0, 0],
-            a[1, 1],
-            a[2, 2],
-            a[1, 2]*SR2,
-            a[0, 2]*SR2,
-            a[0, 1]*SR2
+            a[NVN_CONVENTION[0][0], NVN_CONVENTION[0][1]],
+            a[NVN_CONVENTION[1][0], NVN_CONVENTION[1][1]],
+            a[NVN_CONVENTION[2][0], NVN_CONVENTION[2][1]],
+            a[NVN_CONVENTION[3][0], NVN_CONVENTION[3][1]]*SR2,
+            a[NVN_CONVENTION[4][0], NVN_CONVENTION[4][1]]*SR2,
+            a[NVN_CONVENTION[5][0], NVN_CONVENTION[5][1]]*SR2
         ])
     else:
         out = np.eye(6)
         for i_1 in range(6):
             for i_2 in range(6):
                 out[i_1, i_2] = a[
-                    convention[i_1][0],
-                    convention[i_1][1],
-                    convention[i_2][0],
-                    convention[i_2][1]
+                    NVN_CONVENTION[i_1][0],
+                    NVN_CONVENTION[i_1][1],
+                    NVN_CONVENTION[i_2][0],
+                    NVN_CONVENTION[i_2][1]
                 ]
                 if i_1 > 2:
                     out[i_1, i_2] *= SR2
@@ -552,13 +544,22 @@ def nvn_inv(a: np.ndarray) -> np.ndarray:
         * symmetric 3x3 second-order tensor
         * minor symmetric 3x3x3x3x fourth-order tensor
     """
-    convention = [[0, 0], [1, 1], [2, 2], [1, 2], [0, 2], [0, 1]]
     if a.shape == (6,):
-        out = np.array([
-            a[0], a[5]/SR2, a[4]/SR2,
-            a[5]/SR2, a[1], a[3]/SR2,
-            a[4]/SR2, a[3]/SR2, a[2]
-            ]).reshape(3, 3)
+        out = np.zeros(shape=[3, 3])
+        for i in range(3):
+            out[
+                NVN_CONVENTION[i][0],
+                NVN_CONVENTION[i][1]
+            ] = a[i]
+        for i in range(3, 6):
+            out[
+                NVN_CONVENTION[i][0],
+                NVN_CONVENTION[i][1]
+            ] = a[i]/SR2
+            out[
+                NVN_CONVENTION[i][1],
+                NVN_CONVENTION[i][0]
+            ] = a[i]/SR2
     else:
         out = np.zeros((3, 3, 3, 3))
         for i_1 in range(6):
@@ -569,28 +570,28 @@ def nvn_inv(a: np.ndarray) -> np.ndarray:
                 if i_2 > 2:
                     temp /= SR2
                 out[
-                    convention[i_1][0],
-                    convention[i_1][1],
-                    convention[i_2][0],
-                    convention[i_2][1],
+                    NVN_CONVENTION[i_1][0],
+                    NVN_CONVENTION[i_1][1],
+                    NVN_CONVENTION[i_2][0],
+                    NVN_CONVENTION[i_2][1],
                 ] = temp
                 out[
-                    convention[i_1][1],
-                    convention[i_1][0],
-                    convention[i_2][0],
-                    convention[i_2][1],
+                    NVN_CONVENTION[i_1][1],
+                    NVN_CONVENTION[i_1][0],
+                    NVN_CONVENTION[i_2][0],
+                    NVN_CONVENTION[i_2][1],
                 ] = temp
                 out[
-                    convention[i_1][0],
-                    convention[i_1][1],
-                    convention[i_2][1],
-                    convention[i_2][0],
+                    NVN_CONVENTION[i_1][0],
+                    NVN_CONVENTION[i_1][1],
+                    NVN_CONVENTION[i_2][1],
+                    NVN_CONVENTION[i_2][0],
                 ] = temp
                 out[
-                    convention[i_1][1],
-                    convention[i_1][0],
-                    convention[i_2][1],
-                    convention[i_2][0],
+                    NVN_CONVENTION[i_1][1],
+                    NVN_CONVENTION[i_1][0],
+                    NVN_CONVENTION[i_2][1],
+                    NVN_CONVENTION[i_2][0],
                 ] = temp
     return out
 
@@ -615,108 +616,62 @@ def inv_nvn(a: np.ndarray) -> np.ndarray:
 
 # %% T4: stiffness/compliance tensors of important symmetry groups
 
-def t4_tric_nvn(
-    t_1111, t_1122, t_1133, t_1123, t_1113, t_1112,
-    t_2222, t_2233, t_2223, t_2213, t_2212,
-    t_3333, t_3323, t_3313, t_3312,
-    t_2323, t_2313, t_2312,
-    t_1313, t_1312,
-    t_1212 
-    ) -> np.ndarray:
-    """Generate triclinic tensor in `nvn` with given components.
-
-    Parameters
-    ----------
-    t_1111 : float
-    t_1122 : float
-    t_1133 : float
-    t_1123 : float
-    t_1113 : float
-    t_1112 : float
-    t_2222 : float
-    t_2233 : float
-    t_2223 : float
-    t_2213 : float
-    t_2212 : float
-    t_3333 : float
-    t_3323 : float
-    t_3313 : float
-    t_3312 : float
-    t_2323 : float
-    t_2313 : float
-    t_2312 : float
-    t_1313 : float
-    t_1312 : float
-    t_1212 : float
-
-    Returns
-    -------
-    np.ndarray
-        6x6 matrix corresponding to `nvn`
-    """
-    out = np.array([
-        [t_1111, t_1122, t_1133, SR2*t_1123, SR2*t_1113, SR2*t_1112],
-        [t_1122, t_2222, t_2233, SR2*t_2223, SR2*t_2213, SR2*t_2212],
-        [t_1133, t_2233, t_3333, SR2*t_3323, SR2*t_3313, SR2*t_3312],
-        [SR2*t_1123, SR2*t_2223, SR2*t_3323, 2*t_2323, 2*t_2313, 2*t_2312],
-        [SR2*t_1113, SR2*t_2213, SR2*t_3313, 2*t_2313, 2*t_1313, 2*t_1312],
-        [SR2*t_1112, SR2*t_2212, SR2*t_3312, 2*t_2312, 2*t_1312, 2*t_1212]
-    ])
+def stiffness_component_dict(components=None):
+    out = {}
+    counter = 0
+    for i_1 in range(6):
+        for i_2 in range(i_1, 6):
+            k = NVN_CONVENTION[i_1] + NVN_CONVENTION[i_2]
+            k = np.array(k) + 1
+            k = "".join(str(k_) for k_ in k)
+            if type(components) != type(None):
+                out[k] = components[counter]
+                counter += 1
+            else:
+                out[k] = 0
     return out
 
-def t4_tric(*args) -> np.ndarray:
-    """Generate triclinic fourth-order tensor.
-
-    Generate from 21 components of `nvn` variant.
+def stiffness_tric(
+        components: np.ndarray = None, 
+        components_d: dict = None
+    ) -> np.ndarray:
+    """Generate triclinic fourth-order stiffness tensor.
 
     Parameters
     ----------
-    args : 21 components of triclinic tensor
-        row-wise in `nvn`
+    components : np.ndarray
+        21 components of triclinic tensor, see
+        stiffness_component_dict 
+    components_d : dictionary
+        dictionary with 21 components 
+        of triclinic tensor, see
+        stiffness_component_dict
 
     Returns
     -------
     np.ndarray
-        Fourth-order triclinic tensor with minor symmetries
+        Fourth-order triclinic tensor with minor 
+        and major symmetries
     """
-    return nvn_inv(t4_tric_nvn(*args))
+    out = np.zeros(shape=[3, 3, 3, 3])
+    if type(components) != type(None):
+        components_d = stiffness_component_dict(components)
+    for k, v in components_d.items():
+        i = [int(s)-1 for s in k]
+        out[i[0], i[1], i[2], i[3]] = v
+        # tt_l
+        out[i[1], i[0], i[2], i[3]] = v
+        # tt_r
+        out[i[0], i[1], i[3], i[2]] = v
+        out[i[1], i[0], i[3], i[2]] = v # + tt_l
+        # tt_m
+        out[i[2], i[3], i[0], i[1]] = v
+        out[i[3], i[2], i[0], i[1]] = v # + tt_l
+        out[i[2], i[3], i[1], i[0]] = v # + tt_r
+        out[i[3], i[2], i[1], i[0]] = v # + tt_l + tt_r
+    return out
 
-def t4_hex_nvn(
-    t_1111: float, 
-    t_1122: float, 
-    t_1133: float, 
-    t_3333: float, 
-    t_2323: float
-    ):
-    """Generate hexagonal tensor in `nvn`.
-
-    Generate hexagonal/transversaly isotropic fourth-order
-    tensor with symmetry axis e_3 in `nvn`.
-
-    Parameters
-    ----------
-    t_1111 : float
-    t_1122 : float
-    t_1133 : float
-    t_3333 : float
-    t_2323 : float
-
-    Returns
-    -------
-    np.ndarray
-        6x6 `nvn` representation of fourth-order hexagonal tensor
-    """
-    # Isotropy axis is e_3
-    return t4_tric_nvn(
-        t_1111, t_1122, t_1133, 0, 0, 0,
-        t_1111, t_1133, 0, 0, 0,
-        t_3333, 0, 0, 0,
-        t_2323, 0, 0,
-        t_2323, 0,
-        (t_1111 - t_1122)/2
-        )
-
-def t4_hex(
+def stiffness_hex(
     t_1111: float, 
     t_1122: float, 
     t_1133: float, 
@@ -741,7 +696,56 @@ def t4_hex(
     np.ndarray
         Hexagonal fourth-order tensor with shape (3, 3, 3, 3)
     """
-    return nvn_inv(t4_hex_nvn(t_1111, t_1122, t_1133, t_3333, t_2323))
+    # Isotropy axis is e_3
+    components_d = {
+        "1111": t_1111,
+        "1122": t_1122,
+        "1133": t_1133,
+        "1123": 0,
+        "1113": 0,
+        "1112": 0,
+        "2222": t_1111,
+        "2233": t_1133,
+        "2223": 0,
+        "2213": 0,
+        "2212": 0,
+        "3333": t_3333,
+        "3323": 0,
+        "3313": 0,
+        "3312": 0,
+        "2323": t_2323,
+        "2313": 0,
+        "2312": 0,
+        "1313": t_2323,
+        "1312": 0,
+        "1212": (t_1111 - t_1122)/2
+    }
+    out = stiffness_tric(components_d=components_d)
+    return out
+
+def stiffness_cub_l(l_1: float, l_2: float, l_3: float) -> np.ndarray:
+    return td(np.array([l_1, l_2, l_3]), P_CUB, 1)
+
+def stiffness_cub_get_l(stiffness: np.ndarray) -> np.ndarray:
+    return np.array([sp(stiffness, P)/sp(P, P) for P in P_CUB])
+
+def stiffness_cub(
+        c_1111: float, 
+        c_1122: float,
+        c_2323: float
+    ) -> np.ndarray:
+    l_1 = c_1111 + 2*c_1122
+    l_2 = c_1111 - c_1122 
+    l_3 = 2*c_2323
+    return stiffness_cub_l(l_1, l_2, l_3)
+
+def stiffness_iso_l(l_1: float, l_2: float) -> np.ndarray:
+    return iso_t([l_1, l_2])
+
+def stiffness_iso(E: float, nu: float) -> np.ndarray:
+    l_1 = E/(1-2*nu)
+    l_2 = E/(1+nu)
+    return iso_t([l_1, l_2])
 
 # %% Rotations
 
@@ -795,7 +799,24 @@ ID_A = ID_4 - ID_S
 P_ISO_1 = ITI/3
 P_ISO_2 = ID_S - P_ISO_1
 P_ISO_3 = ID_A
-P_ISO = [P_ISO_1, P_ISO_2, P_ISO_3]
+P_ISO = np.array([P_ISO_1, P_ISO_2, P_ISO_3])
+P_CUB_1 = P_ISO_1
+D_CUB = np.zeros(shape=[3]*4)
+for i in range(3):
+    D_CUB[i, i, i, i] = 1
+P_CUB_2 = D_CUB - P_CUB_1
+P_CUB_3 = ID_S - (P_CUB_1 + P_CUB_2)
+P_CUB = np.array([P_CUB_1, P_CUB_2, P_CUB_3])
+
+# Normalized Voigt notation convention
+NVN_CONVENTION = [ 
+    [0, 0],
+    [1, 1],
+    [2, 2],
+    [0, 1],
+    [0, 2],
+    [1, 2]
+]
 
 # nvn variants
 ID_S_NVN = nvn(ID_S)

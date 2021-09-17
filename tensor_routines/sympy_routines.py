@@ -267,15 +267,8 @@ def nvn(a: spy.Array) -> spy.Matrix:
     """Normalized Voigt notation.
 
     Return the symmetric second- or minor symmetric fourth-order tensor 
-    `a` in normalized Voigt notation according to the convention 
-    (Python indices):
-
-        * [0, 0] 
-        * [1, 1] 
-        * [2, 2] 
-        * sqrt(2)*[1, 2] 
-        * sqrt(2)*[0, 2] 
-        * sqrt(2)*[0, 1]
+    `a` in normalized Voigt notation according to the convention defined
+    by the module constant NVN_CONVENTION.
 
     The norm of the returned objects corresponds to the actual Frobenius
     norm of the original tensors. For fourth-order tensors, the inverse
@@ -294,25 +287,33 @@ def nvn(a: spy.Array) -> spy.Matrix:
         * Second order: 6D vector representation
         * Fourth order: 6x6 matrix representation
     """
-    convention = [[0, 0], [1, 1], [2, 2], [1, 2], [0, 2], [0, 1]]
+    #convention = [[0, 0], [1, 1], [2, 2], [1, 2], [0, 2], [0, 1]]
     if a.shape == (3, 3):
-        out = spy.Matrix([
-            a[0, 0],
-            a[1, 1],
-            a[2, 2],
-            a[1, 2]*SR2,
-            a[0, 2]*SR2,
-            a[0, 1]*SR2
+        # out = spy.Matrix([
+        #     a[0, 0],
+        #     a[1, 1],
+        #     a[2, 2],
+        #     a[1, 2]*SR2,
+        #     a[0, 2]*SR2,
+        #     a[0, 1]*SR2
+        # ])
+        out = spy.Matrix([ 
+            a[NVN_CONVENTION[0][0], NVN_CONVENTION[0][1]],
+            a[NVN_CONVENTION[1][0], NVN_CONVENTION[1][1]],
+            a[NVN_CONVENTION[2][0], NVN_CONVENTION[2][1]],
+            a[NVN_CONVENTION[3][0], NVN_CONVENTION[3][1]]*SR2,
+            a[NVN_CONVENTION[4][0], NVN_CONVENTION[4][1]]*SR2,
+            a[NVN_CONVENTION[5][0], NVN_CONVENTION[5][1]]*SR2
         ])
     else:
         out = spy.eye(6)
         for i_1 in range(6):
             for i_2 in range(6):
                 out[i_1, i_2] = a[
-                    convention[i_1][0],
-                    convention[i_1][1],
-                    convention[i_2][0],
-                    convention[i_2][1]
+                    NVN_CONVENTION[i_1][0],
+                    NVN_CONVENTION[i_1][1],
+                    NVN_CONVENTION[i_2][0],
+                    NVN_CONVENTION[i_2][1]
                 ]
                 if i_1 > 2:
                     out[i_1, i_2] *= SR2
@@ -339,13 +340,28 @@ def nvn_inv(a: spy.Array) -> spy.Array:
         * symmetric 3x3 second-order tensor
         * minor symmetric 3x3x3x3x fourth-order tensor
     """
-    convention = [[0, 0], [1, 1], [2, 2], [1, 2], [0, 2], [0, 1]]
+    #convention = [[0, 0], [1, 1], [2, 2], [1, 2], [0, 2], [0, 1]]
     if a.shape == (6, 1):
-        out = spy.Array([
-            a[0], a[5]/SR2, a[4]/SR2,
-            a[5]/SR2, a[1], a[3]/SR2,
-            a[4]/SR2, a[3]/SR2, a[2]
-            ]).reshape(3, 3)
+        # out = spy.Array([
+        #     a[0], a[5]/SR2, a[4]/SR2,
+        #     a[5]/SR2, a[1], a[3]/SR2,
+        #     a[4]/SR2, a[3]/SR2, a[2]
+        #     ]).reshape(3, 3)
+        out = spy.MutableDenseNDimArray(np.zeros([3]*2))
+        for i in range(3):
+            out[ 
+                NVN_CONVENTION[i][0],
+                NVN_CONVENTION[i][1]
+            ] = a[i]
+        for i in range(3, 6):
+            out[ 
+                NVN_CONVENTION[i][0],
+                NVN_CONVENTION[i][1]
+            ] = a[i]/SR2
+            out[ 
+                NVN_CONVENTION[i][1],
+                NVN_CONVENTION[i][0]
+            ] = a[i]/SR2
     else:
         out = spy.MutableDenseNDimArray(np.zeros([3]*4))
         for i_1 in range(6):
@@ -356,30 +372,30 @@ def nvn_inv(a: spy.Array) -> spy.Array:
                 if i_2 > 2:
                     temp /= SR2
                 out[
-                    convention[i_1][0],
-                    convention[i_1][1],
-                    convention[i_2][0],
-                    convention[i_2][1],
+                    NVN_CONVENTION[i_1][0],
+                    NVN_CONVENTION[i_1][1],
+                    NVN_CONVENTION[i_2][0],
+                    NVN_CONVENTION[i_2][1],
                 ] = temp
                 out[
-                    convention[i_1][1],
-                    convention[i_1][0],
-                    convention[i_2][0],
-                    convention[i_2][1],
+                    NVN_CONVENTION[i_1][1],
+                    NVN_CONVENTION[i_1][0],
+                    NVN_CONVENTION[i_2][0],
+                    NVN_CONVENTION[i_2][1],
                 ] = temp
                 out[
-                    convention[i_1][0],
-                    convention[i_1][1],
-                    convention[i_2][1],
-                    convention[i_2][0],
+                    NVN_CONVENTION[i_1][0],
+                    NVN_CONVENTION[i_1][1],
+                    NVN_CONVENTION[i_2][1],
+                    NVN_CONVENTION[i_2][0],
                 ] = temp
                 out[
-                    convention[i_1][1],
-                    convention[i_1][0],
-                    convention[i_2][1],
-                    convention[i_2][0],
+                    NVN_CONVENTION[i_1][1],
+                    NVN_CONVENTION[i_1][0],
+                    NVN_CONVENTION[i_2][1],
+                    NVN_CONVENTION[i_2][0],
                 ] = temp
-        out = out.as_immutable()
+    out = out.as_immutable()
     return out
 
 
@@ -407,6 +423,31 @@ def inv_nvn(a: spy.Array) -> spy.Array:
         a = a.inv()
     return nvn_inv(a)
 
+# %% Material tensors: stiffness
+
+def stiffness_cub_l(l_1: float, l_2: float, l_3: float) -> spy.Array:
+    return td(spy.Array([l_1, l_2, l_3]), P_CUB, 1)
+
+def stiffness_cub_get_l(stiffness: spy.Array) -> spy.Array:
+    return spy.Array([sp(stiffness, P)/sp(P, P) for P in P_CUB])
+
+def stiffness_cub(
+        c_1111: float, 
+        c_1122: float,
+        c_2323: float
+    ) -> spy.Array:
+    l_1 = c_1111 + 2*c_1122
+    l_2 = c_1111 - c_1122 
+    l_3 = 2*c_2323
+    return stiffness_cub_l(l_1, l_2, l_3)
+
+def stiffness_iso_l(l_1: float, l_2: float) -> spy.Array:
+    return l_1*P_ISO_1 + l_2*P_ISO_2
+
+def stiffness_iso(E: float, nu: float) -> spy.Array:
+    l_1 = E/(1-2*nu)
+    l_2 = E/(1+nu)
+    return stiffness_iso_l(l_1, l_2)
 
 # %% Rotations
     
@@ -494,12 +535,12 @@ ID_2 = spy.Array(spy.eye(3))
 PT = spy.MutableDenseNDimArray(
     np.zeros([3, 3, 3], dtype=int)
     )
-PT[0,1,2] = 1
-PT[1,2,0] = 1
-PT[2,0,1] = 1
-PT[0,2,1] = -1
-PT[2,1,0] = -1
-PT[1,0,2] = -1
+PT[0, 1, 2] = 1
+PT[1, 2, 0] = 1
+PT[2, 0, 1] = 1
+PT[0, 2, 1] = -1
+PT[2, 1, 0] = -1
+PT[1, 0, 2] = -1
 
 # Fourth-order
 ITI = tp(ID_2, ID_2)
@@ -510,3 +551,22 @@ P_ISO_1 = ITI/3
 P_ISO_2 = ID_S - P_ISO_1
 P_ISO_3 = ID_A
 P_ISO = [P_ISO_1, P_ISO_2, P_ISO_3]
+P_CUB_1 = P_ISO_1
+D_CUB = spy.MutableDenseNDimArray(
+    np.zeros(shape=[3]*4, dtype=int)
+)
+for i in range(3):
+    D_CUB[i, i, i, i] = 1
+P_CUB_2 = D_CUB - P_CUB_1
+P_CUB_3 = ID_S - (P_CUB_1 + P_CUB_2)
+P_CUB = spy.Array([P_CUB_1, P_CUB_2, P_CUB_3])
+
+# Normalized Voigt notation convention
+NVN_CONVENTION = [ 
+    [0, 0],
+    [1, 1],
+    [2, 2],
+    [0, 1],
+    [0, 2],
+    [1, 2]
+]

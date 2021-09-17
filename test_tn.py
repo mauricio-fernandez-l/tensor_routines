@@ -119,13 +119,13 @@ def test_nvn():
 
 
 def test_tric():
-    a = tn.t4_tric(*np.random.rand(21))
+    a = tn.stiffness_tric(np.random.rand(21))
     assert (a == tn.tt_l(a)).all()
     assert (a == tn.tt_r(a)).all()
 
 
 def test_hex():
-    a = tn.t4_hex(*np.random.random(5))
+    a = tn.stiffness_hex(*np.random.random(5))
     for _ in range(100):
         Q = tn.rotation_matrix(
             np.array([0, 0, 1]), 
