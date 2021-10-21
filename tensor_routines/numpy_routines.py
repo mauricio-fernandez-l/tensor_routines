@@ -1,10 +1,11 @@
-"""This module offers a collection of tensor routines using numpy."""
+"""This module offers a collection of tensor routines using numpy. """
 
 # %% Import
 
 import numpy as np
 
 # %% Products
+
 
 def td(a: np.ndarray, b: np.ndarray, n: int) -> np.ndarray:
     """Tensor dot.
@@ -40,7 +41,7 @@ def td(a: np.ndarray, b: np.ndarray, n: int) -> np.ndarray:
 
 def sp(a: np.ndarray, b: np.ndarray) -> float:
     """Scalar product.
-    
+
     Compute the scalar product (full contraction) of
     tensors with equal shape.
 
@@ -67,9 +68,9 @@ def sp(a: np.ndarray, b: np.ndarray) -> float:
 
 def nf(a: np.ndarray) -> float:
     """Frobenius norm.
-    
-    Frobenius norm of a real-valued tensor (square 
-    root of the sum of all squared tensor components) 
+
+    Frobenius norm of a real-valued tensor (square
+    root of the sum of all squared tensor components)
     by calling `np.linalg.norm(a)`.
 
     Parameters
@@ -81,7 +82,7 @@ def nf(a: np.ndarray) -> float:
     -------
     float
         Frobenius norm
-    
+
     Examples
     --------
     >>> a = np.random.rand(2, 3, 4)
@@ -93,13 +94,13 @@ def nf(a: np.ndarray) -> float:
 def tp(*args) -> np.ndarray:
     """Tensor product.
 
-    Recursively calls `np.tensordot(a, b, 0)` for argument list `args = [a0, a1, a2, ...]`,
-    yielding, e.g.,
+    Recursively calls `np.tensordot(a, b, 0)` for argument list
+    `args = [a0, a1, a2, ...]`, yielding, e.g.,
         tp(a0, a1, a2) = tp(tp(a0, a1), a2)
 
     Parameters
     ----------
-    args : sequence 
+    args : sequence
         Sequence of tensors
 
     Returns
@@ -176,7 +177,7 @@ def rp(q: np.ndarray, a: np.ndarray) -> np.ndarray:
         Rayleigh product
     """
     n = a.ndim
-    p = [n-1] + list(range(n-1)) # index permutation per Q
+    p = [n-1] + list(range(n-1))  # index permutation per Q
     for _ in range(n):
         a = np.transpose(td(a, np.transpose(q), 1), p)
     return a
@@ -186,7 +187,7 @@ def rp(q: np.ndarray, a: np.ndarray) -> np.ndarray:
 
 def tt(a: np.ndarray, t: list) -> np.ndarray:
     """Tensor dimension transposition.
-    
+
     Shortcut for np.transpose.
 
     Parameters
@@ -211,7 +212,7 @@ def tt(a: np.ndarray, t: list) -> np.ndarray:
     Personal note
     -------------
     np transposes dimensions, NOT indices. It can be
-    considered as the index transpose of the result `at` 
+    considered as the index transpose of the result `at`
     (see examples below).
 
     Pattern:
@@ -221,19 +222,20 @@ def tt(a: np.ndarray, t: list) -> np.ndarray:
         i_t = (i_{t_0}, i_{t_1}, ...)
         at = tr(a, t) in R(*d_t)
         at_{*i_t} = a_{i_0 i_1 ...}
-    
+
     Example 1:
-        a in R(d_0, d_1, d_2, d_3) 
+        a in R(d_0, d_1, d_2, d_3)
         at = tr(a, (3, 1, 0, 2)) in R(d_3, d_1, d_0, d_2)
         at_{i_0 i_1 i_2 i_3} = a_{i_2 i_1 i_3 i_0}
-        at_{i_3 i_1 i_0 i_2} = a_{i_0 i_1 i_2 i_3} <- rename to get dimension transposition
-    
+        at_{i_3 i_1 i_0 i_2} = a_{i_0 i_1 i_2 i_3} <- rename to
+            get dimension transposition
+
     Example 2:
         a in R(d_0, d_1, d_2, d_3)
         at = tr(a, (1, 3, 2, 0)) in R(d_1, d_3, d_2, d_0)
         at_{i_0 i_1 i_2 i_3} = a_{i_3 i_0 i_2 i_1}
         at_{i_1 i_3 i_2 i_0} = a_{i_0 i_1 i_2 i_3} <-
-    
+
     With respect to Mathematica (index transposition):
     a in R(d_0, d_1, d_2, d_3)
     tr(a, (3, 1, 0, 2)) == TensorTranspose(a, {2, 1, 3, 0} + 1)
@@ -311,9 +313,10 @@ def sym_r(a: np.ndarray) -> np.ndarray:
     Returns
     -------
     np.ndarray
-        Fourth-order tensor, symmetric with respect to kl 
+        Fourth-order tensor, symmetric with respect to kl
     """
     return (a + tt_r(a))/2
+
 
 def sym_l(a: np.ndarray) -> np.ndarray:
     """Symmetrize left index pair.
@@ -329,9 +332,10 @@ def sym_l(a: np.ndarray) -> np.ndarray:
     Returns
     -------
     np.ndarray
-        Fourth-order tensor, symmetric with respect to ij 
+        Fourth-order tensor, symmetric with respect to ij
     """
     return (a + tt_l(a))/2
+
 
 def sym_lr(a: np.ndarray) -> np.ndarray:
     """Symmetrize left and right index pair.
@@ -347,21 +351,23 @@ def sym_lr(a: np.ndarray) -> np.ndarray:
     Returns
     -------
     np.ndarray
-        Fourth-order tensor, symmetric with respect to ij and kl 
+        Fourth-order tensor, symmetric with respect to ij and kl
     """
     return sym_r(sym_l(a))
 
 # %% Isotropic
 
+
 def iso_ev(a: np.ndarray) -> np.ndarray:
     """Project eigenvalues of isotropic tensor.
 
-    Compute for a given second- or fourth-order tensor the 
+    Compute for a given second- or fourth-order tensor the
     eigenvalues of the isotropic part of the given tensor `a`
-        * For second-order tensors for `a = lambda ID_2 + aniso_part`, 
-        `lambda` is computed.
-        * For fourth-order tensors `a = sum_{i=1}^3 lambda_i P_ISOi + aniso_part`,
-        the lambda_i are computed.
+        * For second-order tensors for `a = lambda ID_2 + aniso_part`,
+            `lambda` is computed.
+        * For fourth-order tensors
+            `a = sum_{i=1}^3 lambda_i P_ISOi + aniso_part`,
+            the lambda_i are computed.
 
     Parameters
     ----------
@@ -390,17 +396,19 @@ def iso_ev(a: np.ndarray) -> np.ndarray:
         # Second-order
         return sp(a, ID_2)/3
 
-def iso_t(l: np.ndarray) -> np.ndarray:
+
+def iso_t(lam: np.ndarray) -> np.ndarray:
     """Isotropic tensor.
 
-    Create an isotropic second- or fourth-order tensor from the 
+    Create an isotropic second- or fourth-order tensor from the
     given eigenvalue(s).
 
     Parameters
     ----------
-    l : float or np.ndarray
+    lam : float or np.ndarray
         * Second order: float corresponding to lambda for lambda ID_2
-        * Fourth order: 1D-array = [lambda_1,2|3] for sum_{i=1}^3 lambda_i P_ISO_i
+        * Fourth order: 1D-array = [lambda_1,2|3] for
+            sum_{i=1}^3 lambda_i P_ISO_i
             * [lambda_1, lambda_2] for only two first isotropic projects
             * [lambda_1,2,3] for all isotropic projectors
 
@@ -408,7 +416,7 @@ def iso_t(l: np.ndarray) -> np.ndarray:
     -------
     np.ndarray
         Isotropic tensor of second or fourth order.
-    
+
     Examples
     --------
     >>> (iso_t(10) == 10*np.eye(3)).all()
@@ -416,15 +424,16 @@ def iso_t(l: np.ndarray) -> np.ndarray:
     >>> (iso_t([3, 7]) == 3*P_ISO_1 + 7*P_ISO_2).all()
     True
     """
-    if isinstance(l, (list, np.ndarray)):
+    if isinstance(lam, (list, np.ndarray)):
         # Fourth-order
-        if len(l) == 2:
-            return l[0]*P_ISO_1 + l[1]*P_ISO_2
+        if len(lam) == 2:
+            return lam[0]*P_ISO_1 + lam[1]*P_ISO_2
         else:
-            return l[0]*P_ISO_1 + l[1]*P_ISO_2 + l[2]*P_ISO_3
+            return lam[0]*P_ISO_1 + lam[1]*P_ISO_2 + lam[2]*P_ISO_3
     else:
         # Second-order
-        return l*ID_2
+        return lam*ID_2
+
 
 def iso_proj(a: np.ndarray) -> np.ndarray:
     """Isotropic projection.
@@ -444,6 +453,7 @@ def iso_proj(a: np.ndarray) -> np.ndarray:
     """
     return iso_t(iso_ev(a))
 
+
 def iso_inv(a: np.ndarray) -> np.ndarray:
     """Inverse of isotropic tensor.
 
@@ -459,7 +469,7 @@ def iso_inv(a: np.ndarray) -> np.ndarray:
     -------
     np.ndarray
         Inverse or pseudo-inverse
-    
+
     Examples
     --------
     >>> ls = np.array([11, 7, 0])
@@ -471,7 +481,7 @@ def iso_inv(a: np.ndarray) -> np.ndarray:
     """
     if a.shape == (3, 3, 3, 3):
         # Fourth order
-        return iso_t([1/l for l in iso_ev(a) if l != 0])
+        return iso_t([1/la for la in iso_ev(a) if la != 0])
     else:
         # Second order
         return iso_t(1/iso_ev(a))
@@ -519,7 +529,7 @@ def vn(a: np.ndarray) -> np.ndarray:
 def nvn(a: np.ndarray) -> np.ndarray:
     """Normalized Voigt notation.
 
-    Return the symmetric second- or minor symmetric fourth-order tensor 
+    Return the symmetric second- or minor symmetric fourth-order tensor
     `a` in normalized Voigt notation according to the convention defined
     in the module by the constant NVN_CONVENTION.
 
@@ -532,7 +542,8 @@ def nvn(a: np.ndarray) -> np.ndarray:
     ----------
     a : np.ndarray
         * Second order: a.shape == (3, 3) and symmetric
-        * Fourth order: a.shape == (3, 3, 3, 3) and minor symmetric, i.e., a == sym_lr(a)
+        * Fourth order: a.shape == (3, 3, 3, 3) and minor symmetric,
+            i.e., a == sym_lr(a)
 
     Returns
     -------
@@ -564,6 +575,7 @@ def nvn(a: np.ndarray) -> np.ndarray:
                 if i_2 > 2:
                     out[i_1, i_2] *= SR2
     return out
+
 
 def nvn_inv(a: np.ndarray) -> np.ndarray:
     """Inverse of normalized Voigt notation.
@@ -634,6 +646,7 @@ def nvn_inv(a: np.ndarray) -> np.ndarray:
                 ] = temp
     return out
 
+
 def inv_nvn(a: np.ndarray) -> np.ndarray:
     """Compute inverse through nvn.
 
@@ -655,6 +668,7 @@ def inv_nvn(a: np.ndarray) -> np.ndarray:
 
 # %% T1
 
+
 def nv_polar(phi: float) -> np.ndarray:
     """Normal vector based on polar angle
 
@@ -671,6 +685,7 @@ def nv_polar(phi: float) -> np.ndarray:
     x = np.cos(phi)
     y = np.sin(phi)
     return np.array([x, y])
+
 
 def nv_spherical(theta: float, phi: float) -> np.ndarray:
     """Normal vector based on spherical angles
@@ -693,6 +708,7 @@ def nv_spherical(theta: float, phi: float) -> np.ndarray:
     return np.array([x, y, z])
 
 # %% T4: stiffness/compliance tensors of important symmetry groups
+
 
 def stiffness_component_dict(components=None) -> dict:
     """Generate stiffness component dictionary
@@ -718,17 +734,18 @@ def stiffness_component_dict(components=None) -> dict:
             k = VN_CONVENTION[i_1] + VN_CONVENTION[i_2]
             k = np.array(k) + 1
             k = "".join(str(k_) for k_ in k)
-            if type(components) != type(None):
+            if not isinstance(components, type(None)):
                 out[k] = components[counter]
                 counter += 1
             else:
                 out[k] = 0
     return out
 
+
 def stiffness_tric(
-        components: np.ndarray = None,
-        components_d: dict = None
-    ) -> np.ndarray:
+    components: np.ndarray = None,
+    components_d: dict = None
+) -> np.ndarray:
     """Generate triclinic fourth-order stiffness tensor.
 
     Parameters
@@ -748,7 +765,7 @@ def stiffness_tric(
         and major symmetries
     """
     out = np.zeros(shape=[3, 3, 3, 3])
-    if type(components) != type(None):
+    if not isinstance(components, type(None)):
         components_d = stiffness_component_dict(components)
     for k, v in components_d.items():
         i = [int(s)-1 for s in k]
@@ -757,13 +774,14 @@ def stiffness_tric(
         out[i[1], i[0], i[2], i[3]] = v
         # tt_r
         out[i[0], i[1], i[3], i[2]] = v
-        out[i[1], i[0], i[3], i[2]] = v # + tt_l
+        out[i[1], i[0], i[3], i[2]] = v  # + tt_l
         # tt_m
         out[i[2], i[3], i[0], i[1]] = v
-        out[i[3], i[2], i[0], i[1]] = v # + tt_l
-        out[i[2], i[3], i[1], i[0]] = v # + tt_r
-        out[i[3], i[2], i[1], i[0]] = v # + tt_l + tt_r
+        out[i[3], i[2], i[0], i[1]] = v  # + tt_l
+        out[i[2], i[3], i[1], i[0]] = v  # + tt_r
+        out[i[3], i[2], i[1], i[0]] = v  # + tt_l + tt_r
     return out
+
 
 def stiffness_hex(
     t_1111: float,
@@ -771,7 +789,7 @@ def stiffness_hex(
     t_1133: float,
     t_3333: float,
     t_2323: float
-    ) -> np.ndarray:
+) -> np.ndarray:
     """Generate hexagonal fourht-order tensor
 
     Generate hexagonal/transversaly isotropic fourth order
@@ -817,6 +835,7 @@ def stiffness_hex(
     out = stiffness_tric(components_d=components_d)
     return out
 
+
 def stiffness_cub_l(l_1: float, l_2: float, l_3: float) -> np.ndarray:
     """Generate cubic stiffness based on its 3 eigenvalues
 
@@ -836,6 +855,7 @@ def stiffness_cub_l(l_1: float, l_2: float, l_3: float) -> np.ndarray:
     """
     return td(np.array([l_1, l_2, l_3]), P_CUB, 1)
 
+
 def stiffness_cub_get_l(stiffness: np.ndarray) -> np.ndarray:
     """Get eigenvalues of cubic stiffness
 
@@ -851,11 +871,12 @@ def stiffness_cub_get_l(stiffness: np.ndarray) -> np.ndarray:
     """
     return np.array([sp(stiffness, P)/sp(P, P) for P in P_CUB])
 
+
 def stiffness_cub(
-        c_1111: float,
-        c_1122: float,
-        c_2323: float
-    ) -> np.ndarray:
+    c_1111: float,
+    c_1122: float,
+    c_2323: float
+) -> np.ndarray:
     """Generate cubic stiffness based on free components.
 
     Parameters
@@ -877,6 +898,7 @@ def stiffness_cub(
     l_3 = 2*c_2323
     return stiffness_cub_l(l_1, l_2, l_3)
 
+
 def stiffness_iso_l(l_1: float, l_2: float) -> np.ndarray:
     """Generate an isotropic stiffness based on eigenvalues.
 
@@ -894,8 +916,10 @@ def stiffness_iso_l(l_1: float, l_2: float) -> np.ndarray:
     """
     return iso_t([l_1, l_2])
 
+
 def stiffness_iso(E: float, nu: float) -> np.ndarray:
-    """Generate an isotropic stiffness based on Young's modulus E and Poisson's ration nu.
+    """Generate an isotropic stiffness based on Young's modulus E
+    and Poisson's ration nu.
 
     Parameters
     ----------
@@ -914,6 +938,7 @@ def stiffness_iso(E: float, nu: float) -> np.ndarray:
     return iso_t([l_1, l_2])
 
 # %% Rotations
+
 
 def rotation_matrix(n: np.ndarray, phi: float) -> np.ndarray:
     """Rotation matrix.
@@ -941,6 +966,7 @@ def rotation_matrix(n: np.ndarray, phi: float) -> np.ndarray:
     return n_0 + n_1 + n_2
 
 # %% Constants
+
 
 # Scalars
 SR2 = np.sqrt(2)
@@ -976,18 +1002,18 @@ P_CUB = np.array([P_CUB_1, P_CUB_2, P_CUB_3])
 
 # Voigt notation convention
 VN_CONVENTION_ORIGINAL = np.array([
-    [1, 1], # diagonals
+    [1, 1],  # diagonals
     [2, 2],
     [3, 3],
-    [2, 3], # off-diagonals
+    [2, 3],  # off-diagonals
     [1, 3],
     [1, 2]
 ]) - 1
 VN_CONVENTION_ABAQUS = np.array([
-    [1, 1], # diagonals
+    [1, 1],  # diagonals
     [2, 2],
     [3, 3],
-    [1, 2], # off-diagonals
+    [1, 2],  # off-diagonals
     [1, 3],
     [2, 3]
 ]) - 1

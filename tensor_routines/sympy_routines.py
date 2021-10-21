@@ -1,4 +1,4 @@
-"""This module offers a collection of tensor routines in sympy."""
+"""This module offers a collection of tensor routines in sympy. """
 
 # %% Import
 
@@ -10,7 +10,8 @@ from .numpy_routines import VN_CONVENTION
 
 # %% Generate tensors
 
-def t(n: int, s: str = "a", dims: list=None) -> spy.Array:
+
+def t(n: int, s: str = "a", dims: list = None) -> spy.Array:
     """Generate tensor.
 
     Generate n-th-order tensor based on string `s` for the
@@ -77,9 +78,9 @@ def vec(a: spy.Array) -> spy.Matrix:
 # %% Products
 
 def sp(
-    a: spy.Array, 
+    a: spy.Array,
     b: spy.Array
-    ):
+):
     """Scalar product.
 
     Compute the scalar product (full contraction) of
@@ -129,7 +130,7 @@ def td(
     a: spy.Array,
     b: spy.Array,
     n: int
-    ) -> spy.Array:
+) -> spy.Array:
     if a.shape == b.shape and n == a.rank():
         return sp(a, b)
     else:
@@ -166,7 +167,7 @@ def rp(q: spy.Array, a: spy.Array):
 # %% Linear algebra
 
 def linsolve_t(eqs: spy.Array, vs=None) -> list:
-    if vs == None:
+    if vs is None:
         vs = eqs.free_symbols
     if eqs.is_scalar:
         eqs = [eqs]
@@ -214,9 +215,9 @@ def symmetrize(a: spy.Array) -> spy.Array:
 
 
 def symmetrize_explicit(
-    a: spy.Array, 
+    a: spy.Array,
     p: list
-    ) -> spy.Array:
+) -> spy.Array:
     eqs = a - spy.permutedims(a, p)
     vs = eqs.free_symbols
     if len(vs) > 0:
@@ -268,7 +269,7 @@ def sym_lr(a: spy.Array) -> spy.Array:
 
 def vn(a: spy.Array) -> spy.Matrix:
     if a.shape == (3, 3):
-        out = spy.Matrix([ 
+        out = spy.Matrix([
             a[VN_CONVENTION[0][0], VN_CONVENTION[0][1]],
             a[VN_CONVENTION[1][0], VN_CONVENTION[1][1]],
             a[VN_CONVENTION[2][0], VN_CONVENTION[2][1]],
@@ -290,10 +291,11 @@ def vn(a: spy.Array) -> spy.Matrix:
 
 # %% Normalized Voigt notation (NOT Voigt notation)
 
+
 def nvn(a: spy.Array) -> spy.Matrix:
     """Normalized Voigt notation.
 
-    Return the symmetric second- or minor symmetric fourth-order tensor 
+    Return the symmetric second- or minor symmetric fourth-order tensor
     `a` in normalized Voigt notation according to the convention defined
     by the module constant NVN_CONVENTION.
 
@@ -306,7 +308,8 @@ def nvn(a: spy.Array) -> spy.Matrix:
     ----------
     a : spy.Array
         * Second order: a.shape == (3, 3) and symmetric
-        * Fourth order: a.shape == (3, 3, 3, 3) and minor symmetric, i.e., a == sym_lr(a)
+        * Fourth order: a.shape == (3, 3, 3, 3) and minor symmetric,
+        i.e., a == sym_lr(a)
 
     Returns
     -------
@@ -315,7 +318,7 @@ def nvn(a: spy.Array) -> spy.Matrix:
         * Fourth order: 6x6 matrix representation
     """
     if a.shape == (3, 3):
-        out = spy.Matrix([ 
+        out = spy.Matrix([
             a[VN_CONVENTION[0][0], VN_CONVENTION[0][1]],
             a[VN_CONVENTION[1][0], VN_CONVENTION[1][1]],
             a[VN_CONVENTION[2][0], VN_CONVENTION[2][1]],
@@ -359,23 +362,18 @@ def nvn_inv(a: spy.Array) -> spy.Array:
         * minor symmetric 3x3x3x3x fourth-order tensor
     """
     if a.shape == (6, 1):
-        # out = spy.Array([
-        #     a[0], a[5]/SR2, a[4]/SR2,
-        #     a[5]/SR2, a[1], a[3]/SR2,
-        #     a[4]/SR2, a[3]/SR2, a[2]
-        #     ]).reshape(3, 3)
         out = spy.MutableDenseNDimArray(np.zeros([3]*2))
         for i in range(3):
-            out[ 
+            out[
                 VN_CONVENTION[i][0],
                 VN_CONVENTION[i][1]
             ] = a[i]
         for i in range(3, 6):
-            out[ 
+            out[
                 VN_CONVENTION[i][0],
                 VN_CONVENTION[i][1]
             ] = a[i]/SR2
-            out[ 
+            out[
                 VN_CONVENTION[i][1],
                 VN_CONVENTION[i][0]
             ] = a[i]/SR2
@@ -421,7 +419,7 @@ def inv_nvn(a: spy.Array) -> spy.Array:
 
     Compute inverse of minor symmetric fourth-order tensor
     through `nvn`. The inverse applies only on symmetric
-    second-order tensors. 
+    second-order tensors.
 
     Parameters
     ----------
@@ -442,24 +440,29 @@ def inv_nvn(a: spy.Array) -> spy.Array:
 
 # %% Material tensors: stiffness
 
+
 def stiffness_cub_l(l_1: float, l_2: float, l_3: float) -> spy.Array:
     return td(spy.Array([l_1, l_2, l_3]), P_CUB, 1)
+
 
 def stiffness_cub_get_l(stiffness: spy.Array) -> spy.Array:
     return spy.Array([sp(stiffness, P)/sp(P, P) for P in P_CUB])
 
+
 def stiffness_cub(
-        c_1111: float, 
-        c_1122: float,
-        c_2323: float
-    ) -> spy.Array:
+    c_1111: float,
+    c_1122: float,
+    c_2323: float
+) -> spy.Array:
     l_1 = c_1111 + 2*c_1122
-    l_2 = c_1111 - c_1122 
+    l_2 = c_1111 - c_1122
     l_3 = 2*c_2323
     return stiffness_cub_l(l_1, l_2, l_3)
 
+
 def stiffness_iso_l(l_1: float, l_2: float) -> spy.Array:
     return l_1*P_ISO_1 + l_2*P_ISO_2
+
 
 def stiffness_iso(E: float, nu: float) -> spy.Array:
     l_1 = E/(1-2*nu)
@@ -467,21 +470,27 @@ def stiffness_iso(E: float, nu: float) -> spy.Array:
     return stiffness_iso_l(l_1, l_2)
 
 # %% Rotations
-    
+
+
 def rotation_matrix(
-    n: spy.Array, 
+    n: spy.Array,
     phi: float
-    ) -> spy.Array:
+) -> spy.Array:
     n = n/nf(n)
-    return spy.cos(phi)*ID_2 - spy.sin(phi)*lm(PT, n) + (1-spy.cos(phi))*tp(n, n)
+    out = (
+        spy.cos(phi)*ID_2
+        - spy.sin(phi)*lm(PT, n)
+        + (1-spy.cos(phi))*tp(n, n)
+    )
+    return out
 
 
 # %% Harmonic tensors
 
 def harmonic(n: int, s: str = "h") -> spy.Array:
-    if n==0:
+    if n == 0:
         return spy.symbols(s)
-    elif n==1:
+    elif n == 1:
         return t(1, s)
     else:
         a = symmetrize(t(n, s))
@@ -503,8 +512,8 @@ def harmonic_onb(n: int) -> list:
 def project_on_basis(
     a: spy.Array,
     basis: spy.Array
-    ) -> spy.Array:
-    cs = spy.Array(spy.symbols(f"c:{basis.shape[0]}")) 
+) -> spy.Array:
+    cs = spy.Array(spy.symbols(f"c:{basis.shape[0]}"))
     lc = td(cs, basis, 1)
     return cs.subs(linsolve_t(a - lc, cs))
 
@@ -551,7 +560,7 @@ ID_2 = spy.Array(spy.eye(3))
 # Permutation tensor
 PT = spy.MutableDenseNDimArray(
     np.zeros([3, 3, 3], dtype=int)
-    )
+)
 PT[0, 1, 2] = 1
 PT[1, 2, 0] = 1
 PT[2, 0, 1] = 1
