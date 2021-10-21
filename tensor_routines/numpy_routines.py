@@ -480,22 +480,22 @@ def iso_inv(a: np.ndarray) -> np.ndarray:
 def vn(a: np.ndarray) -> np.ndarray:
     if a.shape == (3, 3):
         out = np.array([
-            a[NVN_CONVENTION[0][0], NVN_CONVENTION[0][1]],
-            a[NVN_CONVENTION[1][0], NVN_CONVENTION[1][1]],
-            a[NVN_CONVENTION[2][0], NVN_CONVENTION[2][1]],
-            a[NVN_CONVENTION[3][0], NVN_CONVENTION[3][1]],
-            a[NVN_CONVENTION[4][0], NVN_CONVENTION[4][1]],
-            a[NVN_CONVENTION[5][0], NVN_CONVENTION[5][1]]
+            a[VN_CONVENTION[0][0], VN_CONVENTION[0][1]],
+            a[VN_CONVENTION[1][0], VN_CONVENTION[1][1]],
+            a[VN_CONVENTION[2][0], VN_CONVENTION[2][1]],
+            a[VN_CONVENTION[3][0], VN_CONVENTION[3][1]],
+            a[VN_CONVENTION[4][0], VN_CONVENTION[4][1]],
+            a[VN_CONVENTION[5][0], VN_CONVENTION[5][1]]
         ])
     else:
         out = np.eye(6)
         for i_1 in range(6):
             for i_2 in range(6):
                 out[i_1, i_2] = a[
-                    NVN_CONVENTION[i_1][0],
-                    NVN_CONVENTION[i_1][1],
-                    NVN_CONVENTION[i_2][0],
-                    NVN_CONVENTION[i_2][1]
+                    VN_CONVENTION[i_1][0],
+                    VN_CONVENTION[i_1][1],
+                    VN_CONVENTION[i_2][0],
+                    VN_CONVENTION[i_2][1]
                 ]
     return out
 
@@ -528,22 +528,22 @@ def nvn(a: np.ndarray) -> np.ndarray:
     """
     if a.shape == (3, 3):
         out = np.array([
-            a[NVN_CONVENTION[0][0], NVN_CONVENTION[0][1]],
-            a[NVN_CONVENTION[1][0], NVN_CONVENTION[1][1]],
-            a[NVN_CONVENTION[2][0], NVN_CONVENTION[2][1]],
-            a[NVN_CONVENTION[3][0], NVN_CONVENTION[3][1]]*SR2,
-            a[NVN_CONVENTION[4][0], NVN_CONVENTION[4][1]]*SR2,
-            a[NVN_CONVENTION[5][0], NVN_CONVENTION[5][1]]*SR2
+            a[VN_CONVENTION[0][0], VN_CONVENTION[0][1]],
+            a[VN_CONVENTION[1][0], VN_CONVENTION[1][1]],
+            a[VN_CONVENTION[2][0], VN_CONVENTION[2][1]],
+            a[VN_CONVENTION[3][0], VN_CONVENTION[3][1]]*SR2,
+            a[VN_CONVENTION[4][0], VN_CONVENTION[4][1]]*SR2,
+            a[VN_CONVENTION[5][0], VN_CONVENTION[5][1]]*SR2
         ])
     else:
         out = np.eye(6)
         for i_1 in range(6):
             for i_2 in range(6):
                 out[i_1, i_2] = a[
-                    NVN_CONVENTION[i_1][0],
-                    NVN_CONVENTION[i_1][1],
-                    NVN_CONVENTION[i_2][0],
-                    NVN_CONVENTION[i_2][1]
+                    VN_CONVENTION[i_1][0],
+                    VN_CONVENTION[i_1][1],
+                    VN_CONVENTION[i_2][0],
+                    VN_CONVENTION[i_2][1]
                 ]
                 if i_1 > 2:
                     out[i_1, i_2] *= SR2
@@ -573,17 +573,17 @@ def nvn_inv(a: np.ndarray) -> np.ndarray:
         out = np.zeros(shape=[3, 3])
         for i in range(3):
             out[
-                NVN_CONVENTION[i][0],
-                NVN_CONVENTION[i][1]
+                VN_CONVENTION[i][0],
+                VN_CONVENTION[i][1]
             ] = a[i]
         for i in range(3, 6):
             out[
-                NVN_CONVENTION[i][0],
-                NVN_CONVENTION[i][1]
+                VN_CONVENTION[i][0],
+                VN_CONVENTION[i][1]
             ] = a[i]/SR2
             out[
-                NVN_CONVENTION[i][1],
-                NVN_CONVENTION[i][0]
+                VN_CONVENTION[i][1],
+                VN_CONVENTION[i][0]
             ] = a[i]/SR2
     else:
         out = np.zeros((3, 3, 3, 3))
@@ -595,28 +595,28 @@ def nvn_inv(a: np.ndarray) -> np.ndarray:
                 if i_2 > 2:
                     temp /= SR2
                 out[
-                    NVN_CONVENTION[i_1][0],
-                    NVN_CONVENTION[i_1][1],
-                    NVN_CONVENTION[i_2][0],
-                    NVN_CONVENTION[i_2][1],
+                    VN_CONVENTION[i_1][0],
+                    VN_CONVENTION[i_1][1],
+                    VN_CONVENTION[i_2][0],
+                    VN_CONVENTION[i_2][1],
                 ] = temp
                 out[
-                    NVN_CONVENTION[i_1][1],
-                    NVN_CONVENTION[i_1][0],
-                    NVN_CONVENTION[i_2][0],
-                    NVN_CONVENTION[i_2][1],
+                    VN_CONVENTION[i_1][1],
+                    VN_CONVENTION[i_1][0],
+                    VN_CONVENTION[i_2][0],
+                    VN_CONVENTION[i_2][1],
                 ] = temp
                 out[
-                    NVN_CONVENTION[i_1][0],
-                    NVN_CONVENTION[i_1][1],
-                    NVN_CONVENTION[i_2][1],
-                    NVN_CONVENTION[i_2][0],
+                    VN_CONVENTION[i_1][0],
+                    VN_CONVENTION[i_1][1],
+                    VN_CONVENTION[i_2][1],
+                    VN_CONVENTION[i_2][0],
                 ] = temp
                 out[
-                    NVN_CONVENTION[i_1][1],
-                    NVN_CONVENTION[i_1][0],
-                    NVN_CONVENTION[i_2][1],
-                    NVN_CONVENTION[i_2][0],
+                    VN_CONVENTION[i_1][1],
+                    VN_CONVENTION[i_1][0],
+                    VN_CONVENTION[i_2][1],
+                    VN_CONVENTION[i_2][0],
                 ] = temp
     return out
 
@@ -659,7 +659,7 @@ def stiffness_component_dict(components=None):
     counter = 0
     for i_1 in range(6):
         for i_2 in range(i_1, 6):
-            k = NVN_CONVENTION[i_1] + NVN_CONVENTION[i_2]
+            k = VN_CONVENTION[i_1] + VN_CONVENTION[i_2]
             k = np.array(k) + 1
             k = "".join(str(k_) for k_ in k)
             if type(components) != type(None):
@@ -846,15 +846,24 @@ P_CUB_2 = D_CUB - P_CUB_1
 P_CUB_3 = ID_S - (P_CUB_1 + P_CUB_2)
 P_CUB = np.array([P_CUB_1, P_CUB_2, P_CUB_3])
 
-# Normalized Voigt notation convention
-NVN_CONVENTION = [ 
-    [0, 0],
-    [1, 1],
+# Voigt notation convention
+VN_CONVENTION_ORIGINAL = np.array([ 
+    [1, 1], # diagonals
     [2, 2],
-    [0, 1],
-    [0, 2],
+    [3, 3],
+    [2, 3], # off-diagonals
+    [1, 3],
     [1, 2]
-]
+]) - 1
+VN_CONVENTION_ABAQUS = np.array([ 
+    [1, 1], # diagonals
+    [2, 2],
+    [3, 3],
+    [1, 2], # off-diagonals
+    [1, 3],
+    [2, 3]
+]) - 1
+VN_CONVENTION = [list(pair) for pair in VN_CONVENTION_ABAQUS]
 
 # nvn variants
 ID_S_NVN = nvn(ID_S)

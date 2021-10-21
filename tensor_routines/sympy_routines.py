@@ -4,6 +4,8 @@ import sympy as spy
 import numpy as np
 from itertools import permutations
 
+from .numpy_routines import VN_CONVENTION
+
 # %% Generate tensors
 
 def t(n: int, s: str = "a", dims: list=None) -> spy.Array:
@@ -261,6 +263,30 @@ def sym_lr(a: spy.Array) -> spy.Array:
     return sym_r(sym_l(a))
 
 
+# %% Voigt notation (not normalized)
+
+def vn(a: spy.Array) -> spy.Matrix:
+    if a.shape == (3, 3):
+        out = spy.Matrix([ 
+            a[VN_CONVENTION[0][0], VN_CONVENTION[0][1]],
+            a[VN_CONVENTION[1][0], VN_CONVENTION[1][1]],
+            a[VN_CONVENTION[2][0], VN_CONVENTION[2][1]],
+            a[VN_CONVENTION[3][0], VN_CONVENTION[3][1]],
+            a[VN_CONVENTION[4][0], VN_CONVENTION[4][1]],
+            a[VN_CONVENTION[5][0], VN_CONVENTION[5][1]]
+        ])
+    else:
+        out = spy.eye(6)
+        for i_1 in range(6):
+            for i_2 in range(6):
+                out[i_1, i_2] = a[
+                    VN_CONVENTION[i_1][0],
+                    VN_CONVENTION[i_1][1],
+                    VN_CONVENTION[i_2][0],
+                    VN_CONVENTION[i_2][1]
+                ]
+    return out
+
 # %% Normalized Voigt notation (NOT Voigt notation)
 
 def nvn(a: spy.Array) -> spy.Matrix:
@@ -287,33 +313,24 @@ def nvn(a: spy.Array) -> spy.Matrix:
         * Second order: 6D vector representation
         * Fourth order: 6x6 matrix representation
     """
-    #convention = [[0, 0], [1, 1], [2, 2], [1, 2], [0, 2], [0, 1]]
     if a.shape == (3, 3):
-        # out = spy.Matrix([
-        #     a[0, 0],
-        #     a[1, 1],
-        #     a[2, 2],
-        #     a[1, 2]*SR2,
-        #     a[0, 2]*SR2,
-        #     a[0, 1]*SR2
-        # ])
         out = spy.Matrix([ 
-            a[NVN_CONVENTION[0][0], NVN_CONVENTION[0][1]],
-            a[NVN_CONVENTION[1][0], NVN_CONVENTION[1][1]],
-            a[NVN_CONVENTION[2][0], NVN_CONVENTION[2][1]],
-            a[NVN_CONVENTION[3][0], NVN_CONVENTION[3][1]]*SR2,
-            a[NVN_CONVENTION[4][0], NVN_CONVENTION[4][1]]*SR2,
-            a[NVN_CONVENTION[5][0], NVN_CONVENTION[5][1]]*SR2
+            a[VN_CONVENTION[0][0], VN_CONVENTION[0][1]],
+            a[VN_CONVENTION[1][0], VN_CONVENTION[1][1]],
+            a[VN_CONVENTION[2][0], VN_CONVENTION[2][1]],
+            a[VN_CONVENTION[3][0], VN_CONVENTION[3][1]]*SR2,
+            a[VN_CONVENTION[4][0], VN_CONVENTION[4][1]]*SR2,
+            a[VN_CONVENTION[5][0], VN_CONVENTION[5][1]]*SR2
         ])
     else:
         out = spy.eye(6)
         for i_1 in range(6):
             for i_2 in range(6):
                 out[i_1, i_2] = a[
-                    NVN_CONVENTION[i_1][0],
-                    NVN_CONVENTION[i_1][1],
-                    NVN_CONVENTION[i_2][0],
-                    NVN_CONVENTION[i_2][1]
+                    VN_CONVENTION[i_1][0],
+                    VN_CONVENTION[i_1][1],
+                    VN_CONVENTION[i_2][0],
+                    VN_CONVENTION[i_2][1]
                 ]
                 if i_1 > 2:
                     out[i_1, i_2] *= SR2
@@ -340,7 +357,6 @@ def nvn_inv(a: spy.Array) -> spy.Array:
         * symmetric 3x3 second-order tensor
         * minor symmetric 3x3x3x3x fourth-order tensor
     """
-    #convention = [[0, 0], [1, 1], [2, 2], [1, 2], [0, 2], [0, 1]]
     if a.shape == (6, 1):
         # out = spy.Array([
         #     a[0], a[5]/SR2, a[4]/SR2,
@@ -350,17 +366,17 @@ def nvn_inv(a: spy.Array) -> spy.Array:
         out = spy.MutableDenseNDimArray(np.zeros([3]*2))
         for i in range(3):
             out[ 
-                NVN_CONVENTION[i][0],
-                NVN_CONVENTION[i][1]
+                VN_CONVENTION[i][0],
+                VN_CONVENTION[i][1]
             ] = a[i]
         for i in range(3, 6):
             out[ 
-                NVN_CONVENTION[i][0],
-                NVN_CONVENTION[i][1]
+                VN_CONVENTION[i][0],
+                VN_CONVENTION[i][1]
             ] = a[i]/SR2
             out[ 
-                NVN_CONVENTION[i][1],
-                NVN_CONVENTION[i][0]
+                VN_CONVENTION[i][1],
+                VN_CONVENTION[i][0]
             ] = a[i]/SR2
     else:
         out = spy.MutableDenseNDimArray(np.zeros([3]*4))
@@ -372,28 +388,28 @@ def nvn_inv(a: spy.Array) -> spy.Array:
                 if i_2 > 2:
                     temp /= SR2
                 out[
-                    NVN_CONVENTION[i_1][0],
-                    NVN_CONVENTION[i_1][1],
-                    NVN_CONVENTION[i_2][0],
-                    NVN_CONVENTION[i_2][1],
+                    VN_CONVENTION[i_1][0],
+                    VN_CONVENTION[i_1][1],
+                    VN_CONVENTION[i_2][0],
+                    VN_CONVENTION[i_2][1],
                 ] = temp
                 out[
-                    NVN_CONVENTION[i_1][1],
-                    NVN_CONVENTION[i_1][0],
-                    NVN_CONVENTION[i_2][0],
-                    NVN_CONVENTION[i_2][1],
+                    VN_CONVENTION[i_1][1],
+                    VN_CONVENTION[i_1][0],
+                    VN_CONVENTION[i_2][0],
+                    VN_CONVENTION[i_2][1],
                 ] = temp
                 out[
-                    NVN_CONVENTION[i_1][0],
-                    NVN_CONVENTION[i_1][1],
-                    NVN_CONVENTION[i_2][1],
-                    NVN_CONVENTION[i_2][0],
+                    VN_CONVENTION[i_1][0],
+                    VN_CONVENTION[i_1][1],
+                    VN_CONVENTION[i_2][1],
+                    VN_CONVENTION[i_2][0],
                 ] = temp
                 out[
-                    NVN_CONVENTION[i_1][1],
-                    NVN_CONVENTION[i_1][0],
-                    NVN_CONVENTION[i_2][1],
-                    NVN_CONVENTION[i_2][0],
+                    VN_CONVENTION[i_1][1],
+                    VN_CONVENTION[i_1][0],
+                    VN_CONVENTION[i_2][1],
+                    VN_CONVENTION[i_2][0],
                 ] = temp
     out = out.as_immutable()
     return out
@@ -560,13 +576,3 @@ for i in range(3):
 P_CUB_2 = D_CUB - P_CUB_1
 P_CUB_3 = ID_S - (P_CUB_1 + P_CUB_2)
 P_CUB = spy.Array([P_CUB_1, P_CUB_2, P_CUB_3])
-
-# Normalized Voigt notation convention
-NVN_CONVENTION = [ 
-    [0, 0],
-    [1, 1],
-    [2, 2],
-    [0, 1],
-    [0, 2],
-    [1, 2]
-]
