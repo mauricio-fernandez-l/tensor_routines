@@ -1,0 +1,5 @@
+See https://coverage.readthedocs.io/en/coverage-5.5/
+Check for installation with conda
+
+coverage run -m pytest -v
+coverage report -m
