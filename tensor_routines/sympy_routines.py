@@ -1,3 +1,5 @@
+"""This module offers a collection of tensor routines in sympy."""
+
 # %% Import
 
 import sympy as spy
@@ -11,7 +13,7 @@ from .numpy_routines import VN_CONVENTION
 def t(n: int, s: str = "a", dims: list=None) -> spy.Array:
     """Generate tensor.
 
-    Generate n-th-order tensor based on string `s` for the 
+    Generate n-th-order tensor based on string `s` for the
     components and dimensions `dims`.
 
     Parameters
@@ -29,14 +31,13 @@ def t(n: int, s: str = "a", dims: list=None) -> spy.Array:
     spy.Array
         Tensor
     """
-    if dims == None:
+    if dims is None:
         dims = [3]*n
     head = f"{s}:"
     dims_pattern = ":".join([str(d) for d in dims])
-    symbol_pattern = head + dims_pattern 
+    symbol_pattern = head + dims_pattern
     symbols = spy.symbols(symbol_pattern, real=True)
-    t = spy.Array(symbols, shape=dims)
-    return t
+    return spy.Array(symbols, shape=dims)
 
 
 # %% Transform
@@ -80,7 +81,7 @@ def sp(
     b: spy.Array
     ):
     """Scalar product.
-    
+
     Compute the scalar product (full contraction) of
     tensors with equal shape.
 
@@ -107,8 +108,8 @@ def sp(
 
 def nf(a: spy.Array):
     """Frobenius norm.
-    
-    Frobenius norm of a real-valued tensor (square 
+
+    Frobenius norm of a real-valued tensor (square
     root of the sum of all squared tensor components).
 
     Parameters
@@ -119,14 +120,14 @@ def nf(a: spy.Array):
     Returns
     -------
     scalar
-        Frobenius norm    
+        Frobenius norm
     """
     return vec(a).norm()
 
 
 def td(
-    a: spy.Array, 
-    b: spy.Array, 
+    a: spy.Array,
+    b: spy.Array,
     n: int
     ) -> spy.Array:
     if a.shape == b.shape and n == a.rank():
@@ -157,7 +158,7 @@ def rp(q: spy.Array, a: spy.Array):
     else:
         con = (1, ra + 2 - 1)
         temp = tc(tp(q, a), con)
-        for i in range(ra - 1):
+        for _ in range(ra - 1):
             temp = tc(tp(q, temp), con)
         return temp
 
@@ -571,8 +572,8 @@ P_CUB_1 = P_ISO_1
 D_CUB = spy.MutableDenseNDimArray(
     np.zeros(shape=[3]*4, dtype=int)
 )
-for i in range(3):
-    D_CUB[i, i, i, i] = 1
+for ii in range(3):
+    D_CUB[ii, ii, ii, ii] = 1
 P_CUB_2 = D_CUB - P_CUB_1
 P_CUB_3 = ID_S - (P_CUB_1 + P_CUB_2)
 P_CUB = spy.Array([P_CUB_1, P_CUB_2, P_CUB_3])
