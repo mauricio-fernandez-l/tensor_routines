@@ -475,6 +475,31 @@ def iso_inv(a: np.ndarray) -> np.ndarray:
         return iso_t(1/iso_ev(a))
 
 
+# %% Voigt notation (not normalized)
+
+def vn(a: np.ndarray) -> np.ndarray:
+    if a.shape == (3, 3):
+        out = np.array([
+            a[NVN_CONVENTION[0][0], NVN_CONVENTION[0][1]],
+            a[NVN_CONVENTION[1][0], NVN_CONVENTION[1][1]],
+            a[NVN_CONVENTION[2][0], NVN_CONVENTION[2][1]],
+            a[NVN_CONVENTION[3][0], NVN_CONVENTION[3][1]],
+            a[NVN_CONVENTION[4][0], NVN_CONVENTION[4][1]],
+            a[NVN_CONVENTION[5][0], NVN_CONVENTION[5][1]]
+        ])
+    else:
+        out = np.eye(6)
+        for i_1 in range(6):
+            for i_2 in range(6):
+                out[i_1, i_2] = a[
+                    NVN_CONVENTION[i_1][0],
+                    NVN_CONVENTION[i_1][1],
+                    NVN_CONVENTION[i_2][0],
+                    NVN_CONVENTION[i_2][1]
+                ]
+    return out
+
+
 # %% Normalized Voigt notation (NOT Voigt notation)
 
 def nvn(a: np.ndarray) -> np.ndarray:
@@ -613,6 +638,19 @@ def inv_nvn(a: np.ndarray) -> np.ndarray:
         Inverse of `a` w.r.t. symmetric second-order tensors
     """
     return nvn_inv(np.linalg.inv(nvn(a)))
+
+# %% T1
+
+def nv_polar(phi):
+    x = np.cos(phi)
+    y = np.sin(phi)
+    return np.array([x, y])
+
+def nv_spherical(theta, phi):
+    x = np.sin(theta)*np.cos(phi)
+    y = np.sin(theta)*np.sin(phi)
+    z = np.cos(theta)
+    return np.array([x, y, z])
 
 # %% T4: stiffness/compliance tensors of important symmetry groups
 
