@@ -1,4 +1,9 @@
-"""This module offers a collection of tensor routines in sympy. """
+"""Symbolic routines
+
+Author: Dr.-Ing. Mauricio Fernández
+
+This module offers a collection of tensor routines in sympy.
+"""
 
 # %% Import
 
@@ -6,7 +11,9 @@ import sympy as spy
 import numpy as np
 from itertools import permutations
 
-from .numpy_routines import VN_CONVENTION
+# from .numpy_routines import VN_CONVENTION
+# from tensor_routines import tr.VN_CONVENTION
+import tensor_routines as tr
 
 # %% Generate tensors
 
@@ -270,22 +277,22 @@ def sym_lr(a: spy.Array) -> spy.Array:
 def vn(a: spy.Array) -> spy.Matrix:
     if a.shape == (3, 3):
         out = spy.Matrix([
-            a[VN_CONVENTION[0][0], VN_CONVENTION[0][1]],
-            a[VN_CONVENTION[1][0], VN_CONVENTION[1][1]],
-            a[VN_CONVENTION[2][0], VN_CONVENTION[2][1]],
-            a[VN_CONVENTION[3][0], VN_CONVENTION[3][1]],
-            a[VN_CONVENTION[4][0], VN_CONVENTION[4][1]],
-            a[VN_CONVENTION[5][0], VN_CONVENTION[5][1]]
+            a[tr.VN_CONVENTION[0][0], tr.VN_CONVENTION[0][1]],
+            a[tr.VN_CONVENTION[1][0], tr.VN_CONVENTION[1][1]],
+            a[tr.VN_CONVENTION[2][0], tr.VN_CONVENTION[2][1]],
+            a[tr.VN_CONVENTION[3][0], tr.VN_CONVENTION[3][1]],
+            a[tr.VN_CONVENTION[4][0], tr.VN_CONVENTION[4][1]],
+            a[tr.VN_CONVENTION[5][0], tr.VN_CONVENTION[5][1]]
         ])
     else:
         out = spy.eye(6)
         for i_1 in range(6):
             for i_2 in range(6):
                 out[i_1, i_2] = a[
-                    VN_CONVENTION[i_1][0],
-                    VN_CONVENTION[i_1][1],
-                    VN_CONVENTION[i_2][0],
-                    VN_CONVENTION[i_2][1]
+                    tr.VN_CONVENTION[i_1][0],
+                    tr.VN_CONVENTION[i_1][1],
+                    tr.VN_CONVENTION[i_2][0],
+                    tr.VN_CONVENTION[i_2][1]
                 ]
     return out
 
@@ -319,22 +326,22 @@ def nvn(a: spy.Array) -> spy.Matrix:
     """
     if a.shape == (3, 3):
         out = spy.Matrix([
-            a[VN_CONVENTION[0][0], VN_CONVENTION[0][1]],
-            a[VN_CONVENTION[1][0], VN_CONVENTION[1][1]],
-            a[VN_CONVENTION[2][0], VN_CONVENTION[2][1]],
-            a[VN_CONVENTION[3][0], VN_CONVENTION[3][1]]*SR2,
-            a[VN_CONVENTION[4][0], VN_CONVENTION[4][1]]*SR2,
-            a[VN_CONVENTION[5][0], VN_CONVENTION[5][1]]*SR2
+            a[tr.VN_CONVENTION[0][0], tr.VN_CONVENTION[0][1]],
+            a[tr.VN_CONVENTION[1][0], tr.VN_CONVENTION[1][1]],
+            a[tr.VN_CONVENTION[2][0], tr.VN_CONVENTION[2][1]],
+            a[tr.VN_CONVENTION[3][0], tr.VN_CONVENTION[3][1]]*SR2,
+            a[tr.VN_CONVENTION[4][0], tr.VN_CONVENTION[4][1]]*SR2,
+            a[tr.VN_CONVENTION[5][0], tr.VN_CONVENTION[5][1]]*SR2
         ])
     else:
         out = spy.eye(6)
         for i_1 in range(6):
             for i_2 in range(6):
                 out[i_1, i_2] = a[
-                    VN_CONVENTION[i_1][0],
-                    VN_CONVENTION[i_1][1],
-                    VN_CONVENTION[i_2][0],
-                    VN_CONVENTION[i_2][1]
+                    tr.VN_CONVENTION[i_1][0],
+                    tr.VN_CONVENTION[i_1][1],
+                    tr.VN_CONVENTION[i_2][0],
+                    tr.VN_CONVENTION[i_2][1]
                 ]
                 if i_1 > 2:
                     out[i_1, i_2] *= SR2
@@ -365,17 +372,17 @@ def nvn_inv(a: spy.Array) -> spy.Array:
         out = spy.MutableDenseNDimArray(np.zeros([3]*2))
         for i in range(3):
             out[
-                VN_CONVENTION[i][0],
-                VN_CONVENTION[i][1]
+                tr.VN_CONVENTION[i][0],
+                tr.VN_CONVENTION[i][1]
             ] = a[i]
         for i in range(3, 6):
             out[
-                VN_CONVENTION[i][0],
-                VN_CONVENTION[i][1]
+                tr.VN_CONVENTION[i][0],
+                tr.VN_CONVENTION[i][1]
             ] = a[i]/SR2
             out[
-                VN_CONVENTION[i][1],
-                VN_CONVENTION[i][0]
+                tr.VN_CONVENTION[i][1],
+                tr.VN_CONVENTION[i][0]
             ] = a[i]/SR2
     else:
         out = spy.MutableDenseNDimArray(np.zeros([3]*4))
@@ -387,28 +394,28 @@ def nvn_inv(a: spy.Array) -> spy.Array:
                 if i_2 > 2:
                     temp /= SR2
                 out[
-                    VN_CONVENTION[i_1][0],
-                    VN_CONVENTION[i_1][1],
-                    VN_CONVENTION[i_2][0],
-                    VN_CONVENTION[i_2][1],
+                    tr.VN_CONVENTION[i_1][0],
+                    tr.VN_CONVENTION[i_1][1],
+                    tr.VN_CONVENTION[i_2][0],
+                    tr.VN_CONVENTION[i_2][1],
                 ] = temp
                 out[
-                    VN_CONVENTION[i_1][1],
-                    VN_CONVENTION[i_1][0],
-                    VN_CONVENTION[i_2][0],
-                    VN_CONVENTION[i_2][1],
+                    tr.VN_CONVENTION[i_1][1],
+                    tr.VN_CONVENTION[i_1][0],
+                    tr.VN_CONVENTION[i_2][0],
+                    tr.VN_CONVENTION[i_2][1],
                 ] = temp
                 out[
-                    VN_CONVENTION[i_1][0],
-                    VN_CONVENTION[i_1][1],
-                    VN_CONVENTION[i_2][1],
-                    VN_CONVENTION[i_2][0],
+                    tr.VN_CONVENTION[i_1][0],
+                    tr.VN_CONVENTION[i_1][1],
+                    tr.VN_CONVENTION[i_2][1],
+                    tr.VN_CONVENTION[i_2][0],
                 ] = temp
                 out[
-                    VN_CONVENTION[i_1][1],
-                    VN_CONVENTION[i_1][0],
-                    VN_CONVENTION[i_2][1],
-                    VN_CONVENTION[i_2][0],
+                    tr.VN_CONVENTION[i_1][1],
+                    tr.VN_CONVENTION[i_1][0],
+                    tr.VN_CONVENTION[i_2][1],
+                    tr.VN_CONVENTION[i_2][0],
                 ] = temp
     out = out.as_immutable()
     return out

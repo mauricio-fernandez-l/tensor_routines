@@ -1,8 +1,15 @@
-"""This module offers a collection of tensor routines using numpy. """
+"""Numeric routines
+
+Author: Dr.-Ing. Mauricio Fernández
+
+This module offers a collection of tensor routines using numpy.
+"""
 
 # %% Import
 
 import numpy as np
+
+import tensor_routines as tr
 
 # %% Products
 
@@ -489,6 +496,18 @@ def iso_inv(a: np.ndarray) -> np.ndarray:
 
 # %% Voigt notation (not normalized)
 
+# def set_vn_convention(sel="original"):
+#     global VN_CONVENTION
+#     if sel == "original":
+#         print("Convention for Voigt notation: original")
+#         VN_CONVENTION = [list(pair) for pair in VN_CONVENTION_ORIGINAL]
+#     elif sel == "abaqus":
+#         print("Convention for Voigt notation: abaqus")
+#         VN_CONVENTION = [list(pair) for pair in VN_CONVENTION_ABAQUS]
+#     else:
+#         raise Exception(f"Convention {sel} not implemented")
+
+
 def vn(a: np.ndarray) -> np.ndarray:
     """Voigt notation (based on convention of VN_CONVENTION)
 
@@ -504,22 +523,22 @@ def vn(a: np.ndarray) -> np.ndarray:
     """
     if a.shape == (3, 3):
         out = np.array([
-            a[VN_CONVENTION[0][0], VN_CONVENTION[0][1]],
-            a[VN_CONVENTION[1][0], VN_CONVENTION[1][1]],
-            a[VN_CONVENTION[2][0], VN_CONVENTION[2][1]],
-            a[VN_CONVENTION[3][0], VN_CONVENTION[3][1]],
-            a[VN_CONVENTION[4][0], VN_CONVENTION[4][1]],
-            a[VN_CONVENTION[5][0], VN_CONVENTION[5][1]]
+            a[tr.VN_CONVENTION[0][0], tr.VN_CONVENTION[0][1]],
+            a[tr.VN_CONVENTION[1][0], tr.VN_CONVENTION[1][1]],
+            a[tr.VN_CONVENTION[2][0], tr.VN_CONVENTION[2][1]],
+            a[tr.VN_CONVENTION[3][0], tr.VN_CONVENTION[3][1]],
+            a[tr.VN_CONVENTION[4][0], tr.VN_CONVENTION[4][1]],
+            a[tr.VN_CONVENTION[5][0], tr.VN_CONVENTION[5][1]]
         ])
     else:
         out = np.eye(6)
         for i_1 in range(6):
             for i_2 in range(6):
                 out[i_1, i_2] = a[
-                    VN_CONVENTION[i_1][0],
-                    VN_CONVENTION[i_1][1],
-                    VN_CONVENTION[i_2][0],
-                    VN_CONVENTION[i_2][1]
+                    tr.VN_CONVENTION[i_1][0],
+                    tr.VN_CONVENTION[i_1][1],
+                    tr.VN_CONVENTION[i_2][0],
+                    tr.VN_CONVENTION[i_2][1]
                 ]
     return out
 
@@ -553,22 +572,22 @@ def nvn(a: np.ndarray) -> np.ndarray:
     """
     if a.shape == (3, 3):
         out = np.array([
-            a[VN_CONVENTION[0][0], VN_CONVENTION[0][1]],
-            a[VN_CONVENTION[1][0], VN_CONVENTION[1][1]],
-            a[VN_CONVENTION[2][0], VN_CONVENTION[2][1]],
-            a[VN_CONVENTION[3][0], VN_CONVENTION[3][1]]*SR2,
-            a[VN_CONVENTION[4][0], VN_CONVENTION[4][1]]*SR2,
-            a[VN_CONVENTION[5][0], VN_CONVENTION[5][1]]*SR2
+            a[tr.VN_CONVENTION[0][0], tr.VN_CONVENTION[0][1]],
+            a[tr.VN_CONVENTION[1][0], tr.VN_CONVENTION[1][1]],
+            a[tr.VN_CONVENTION[2][0], tr.VN_CONVENTION[2][1]],
+            a[tr.VN_CONVENTION[3][0], tr.VN_CONVENTION[3][1]]*SR2,
+            a[tr.VN_CONVENTION[4][0], tr.VN_CONVENTION[4][1]]*SR2,
+            a[tr.VN_CONVENTION[5][0], tr.VN_CONVENTION[5][1]]*SR2
         ])
     else:
         out = np.eye(6)
         for i_1 in range(6):
             for i_2 in range(6):
                 out[i_1, i_2] = a[
-                    VN_CONVENTION[i_1][0],
-                    VN_CONVENTION[i_1][1],
-                    VN_CONVENTION[i_2][0],
-                    VN_CONVENTION[i_2][1]
+                    tr.VN_CONVENTION[i_1][0],
+                    tr.VN_CONVENTION[i_1][1],
+                    tr.VN_CONVENTION[i_2][0],
+                    tr.VN_CONVENTION[i_2][1]
                 ]
                 if i_1 > 2:
                     out[i_1, i_2] *= SR2
@@ -599,17 +618,17 @@ def nvn_inv(a: np.ndarray) -> np.ndarray:
         out = np.zeros(shape=[3, 3])
         for i in range(3):
             out[
-                VN_CONVENTION[i][0],
-                VN_CONVENTION[i][1]
+                tr.VN_CONVENTION[i][0],
+                tr.VN_CONVENTION[i][1]
             ] = a[i]
         for i in range(3, 6):
             out[
-                VN_CONVENTION[i][0],
-                VN_CONVENTION[i][1]
+                tr.VN_CONVENTION[i][0],
+                tr.VN_CONVENTION[i][1]
             ] = a[i]/SR2
             out[
-                VN_CONVENTION[i][1],
-                VN_CONVENTION[i][0]
+                tr.VN_CONVENTION[i][1],
+                tr.VN_CONVENTION[i][0]
             ] = a[i]/SR2
     else:
         out = np.zeros((3, 3, 3, 3))
@@ -621,28 +640,28 @@ def nvn_inv(a: np.ndarray) -> np.ndarray:
                 if i_2 > 2:
                     temp /= SR2
                 out[
-                    VN_CONVENTION[i_1][0],
-                    VN_CONVENTION[i_1][1],
-                    VN_CONVENTION[i_2][0],
-                    VN_CONVENTION[i_2][1],
+                    tr.VN_CONVENTION[i_1][0],
+                    tr.VN_CONVENTION[i_1][1],
+                    tr.VN_CONVENTION[i_2][0],
+                    tr.VN_CONVENTION[i_2][1],
                 ] = temp
                 out[
-                    VN_CONVENTION[i_1][1],
-                    VN_CONVENTION[i_1][0],
-                    VN_CONVENTION[i_2][0],
-                    VN_CONVENTION[i_2][1],
+                    tr.VN_CONVENTION[i_1][1],
+                    tr.VN_CONVENTION[i_1][0],
+                    tr.VN_CONVENTION[i_2][0],
+                    tr.VN_CONVENTION[i_2][1],
                 ] = temp
                 out[
-                    VN_CONVENTION[i_1][0],
-                    VN_CONVENTION[i_1][1],
-                    VN_CONVENTION[i_2][1],
-                    VN_CONVENTION[i_2][0],
+                    tr.VN_CONVENTION[i_1][0],
+                    tr.VN_CONVENTION[i_1][1],
+                    tr.VN_CONVENTION[i_2][1],
+                    tr.VN_CONVENTION[i_2][0],
                 ] = temp
                 out[
-                    VN_CONVENTION[i_1][1],
-                    VN_CONVENTION[i_1][0],
-                    VN_CONVENTION[i_2][1],
-                    VN_CONVENTION[i_2][0],
+                    tr.VN_CONVENTION[i_1][1],
+                    tr.VN_CONVENTION[i_1][0],
+                    tr.VN_CONVENTION[i_2][1],
+                    tr.VN_CONVENTION[i_2][0],
                 ] = temp
     return out
 
@@ -731,7 +750,7 @@ def stiffness_component_dict(components=None) -> dict:
     counter = 0
     for i_1 in range(6):
         for i_2 in range(i_1, 6):
-            k = VN_CONVENTION[i_1] + VN_CONVENTION[i_2]
+            k = tr.VN_CONVENTION[i_1] + tr.VN_CONVENTION[i_2]
             k = np.array(k) + 1
             k = "".join(str(k_) for k_ in k)
             if not isinstance(components, type(None)):
@@ -1000,24 +1019,25 @@ P_CUB_2 = D_CUB - P_CUB_1
 P_CUB_3 = ID_S - (P_CUB_1 + P_CUB_2)
 P_CUB = np.array([P_CUB_1, P_CUB_2, P_CUB_3])
 
-# Voigt notation convention
-VN_CONVENTION_ORIGINAL = np.array([
-    [1, 1],  # diagonals
-    [2, 2],
-    [3, 3],
-    [2, 3],  # off-diagonals
-    [1, 3],
-    [1, 2]
-]) - 1
-VN_CONVENTION_ABAQUS = np.array([
-    [1, 1],  # diagonals
-    [2, 2],
-    [3, 3],
-    [1, 2],  # off-diagonals
-    [1, 3],
-    [2, 3]
-]) - 1
-VN_CONVENTION = [list(pair) for pair in VN_CONVENTION_ABAQUS]
+# # Voigt notation convention
+# VN_CONVENTION_ORIGINAL = np.array([
+#     [1, 1],  # diagonals
+#     [2, 2],
+#     [3, 3],
+#     [2, 3],  # off-diagonals
+#     [1, 3],
+#     [1, 2]
+# ]) - 1
+# VN_CONVENTION_ABAQUS = np.array([
+#     [1, 1],  # diagonals
+#     [2, 2],
+#     [3, 3],
+#     [1, 2],  # off-diagonals
+#     [1, 3],
+#     [2, 3]
+# ]) - 1
+# VN_CONVENTION = [list(pair) for pair in VN_CONVENTION_ABAQUS]
+# set_vn_convention("abaqus")
 
 # nvn variants
 ID_S_NVN = nvn(ID_S)
