@@ -11,8 +11,6 @@ import sympy as spy
 import numpy as np
 from itertools import permutations
 
-# from .numpy_routines import VN_CONVENTION
-# from tensor_routines import tr.VN_CONVENTION
 import tensor_routines as tr
 
 # %% Generate tensors
