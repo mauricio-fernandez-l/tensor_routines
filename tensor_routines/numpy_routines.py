@@ -1019,25 +1019,5 @@ P_CUB_2 = D_CUB - P_CUB_1
 P_CUB_3 = ID_S - (P_CUB_1 + P_CUB_2)
 P_CUB = np.array([P_CUB_1, P_CUB_2, P_CUB_3])
 
-# # Voigt notation convention
-# VN_CONVENTION_ORIGINAL = np.array([
-#     [1, 1],  # diagonals
-#     [2, 2],
-#     [3, 3],
-#     [2, 3],  # off-diagonals
-#     [1, 3],
-#     [1, 2]
-# ]) - 1
-# VN_CONVENTION_ABAQUS = np.array([
-#     [1, 1],  # diagonals
-#     [2, 2],
-#     [3, 3],
-#     [1, 2],  # off-diagonals
-#     [1, 3],
-#     [2, 3]
-# ]) - 1
-# VN_CONVENTION = [list(pair) for pair in VN_CONVENTION_ABAQUS]
-# set_vn_convention("abaqus")
-
 # nvn variants
 ID_S_NVN = nvn(ID_S)
