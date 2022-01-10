@@ -12,8 +12,9 @@ import numpy as np
 
 # %% Globals - initialize
 
-# Voigt notation convention
-VN_CONVENTION_ORIGINAL = np.array([
+# Voigt notation conventions
+VN_CONVENTIONS = {}
+VN_CONVENTIONS["original"] = np.array([
     [1, 1],  # diagonals
     [2, 2],
     [3, 3],
@@ -21,7 +22,7 @@ VN_CONVENTION_ORIGINAL = np.array([
     [1, 3],
     [1, 2]
 ]) - 1
-VN_CONVENTION_ABAQUS = np.array([
+VN_CONVENTIONS["abaqus"] = np.array([
     [1, 1],  # diagonals
     [2, 2],
     [3, 3],
@@ -36,16 +37,21 @@ VN_CONVENTION = []
 
 def set_vn_convention(conv="original", info=False):
     global VN_CONVENTION
-    if conv == "original":
-        data = VN_CONVENTION_ORIGINAL
-    elif conv == "abaqus":
-        data = VN_CONVENTION_ABAQUS
-    else:
-        raise Exception(f"Convention {conv} not implemented")
-    VN_CONVENTION = [list(pair) for pair in data]
+    VN_CONVENTION = [list(pair) for pair in VN_CONVENTIONS[conv]]
     if info:
         print(f"Global convention for Voigt notation: {conv}")
+        print("[printing indices starting from 1]")
         print(np.array(VN_CONVENTION) + 1)
+
+
+def get_vn_convention(info=True):
+    if info:
+        for k, v in VN_CONVENTIONS.items():
+            if np.all(v == VN_CONVENTION):
+                print(f"Currently used Voigt notation: {k}")
+                print("[printing indices starting from 1]")
+                print(np.array(VN_CONVENTION) + 1)
+    return VN_CONVENTION
 
 
 # %% Set globals
