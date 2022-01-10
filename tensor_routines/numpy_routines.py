@@ -288,6 +288,22 @@ def tt_l(a: np.ndarray) -> np.ndarray:
     return tt(a, (1, 0, 2, 3))
 
 
+def tt_m(a: np.ndarray) -> np.ndarray:
+    """Major transposition
+
+    Parameters
+    ----------
+    a : np.ndarray
+        Fourth-order tensor, a_ijkl
+
+    Returns
+    -------
+    np.ndarray
+        Fourth-order tensor, a_klij
+    """
+    return tt(a, (2, 3, 0, 1))
+
+
 # %% Symmetrizations
 
 def sym_2(a: np.ndarray) -> np.ndarray:
@@ -361,6 +377,38 @@ def sym_lr(a: np.ndarray) -> np.ndarray:
         Fourth-order tensor, symmetric with respect to ij and kl
     """
     return sym_r(sym_l(a))
+
+
+def sym_m(a: np.ndarray) -> np.ndarray:
+    """Symmetrize major index pair.
+
+    Parameters
+    ----------
+    a : np.ndarray
+        Fourth-order tensor, a_ijkl
+
+    Returns
+    -------
+    np.ndarray
+        Fourth-order tensor fulfilling a_ijkl = a_klij.
+    """
+    return (a + tt_m(a))/2
+
+
+def sym_mm(a: np.ndarray) -> np.ndarray:
+    """Symmetrize minor and major index pairs of given fourth-order tensor.
+
+    Parameters
+    ----------
+    a : np.ndarray
+        Fourth-order tensor, a_ijkl.
+
+    Returns
+    -------
+    np.ndarray
+        Fourth-order tensor fulfilling a_ijkl = a_jikl = a_klij.
+    """
+    return sym_m(sym_lr(a))
 
 # %% Isotropic
 
@@ -496,20 +544,8 @@ def iso_inv(a: np.ndarray) -> np.ndarray:
 
 # %% Voigt notation (not normalized)
 
-# def set_vn_convention(sel="original"):
-#     global VN_CONVENTION
-#     if sel == "original":
-#         print("Convention for Voigt notation: original")
-#         VN_CONVENTION = [list(pair) for pair in VN_CONVENTION_ORIGINAL]
-#     elif sel == "abaqus":
-#         print("Convention for Voigt notation: abaqus")
-#         VN_CONVENTION = [list(pair) for pair in VN_CONVENTION_ABAQUS]
-#     else:
-#         raise Exception(f"Convention {sel} not implemented")
-
-
 def vn(a: np.ndarray) -> np.ndarray:
-    """Voigt notation (based on convention of VN_CONVENTION)
+    """Voigt notation (based on convention of tr.VN_CONVENTION)
 
     Parameters
     ----------
@@ -540,6 +576,71 @@ def vn(a: np.ndarray) -> np.ndarray:
                     tr.VN_CONVENTION[i_2][0],
                     tr.VN_CONVENTION[i_2][1]
                 ]
+    return out
+
+
+def vn_inv(a: np.ndarray) -> np.ndarray:
+    """Inverse Voigt notation.
+
+    Reconstruct symmetric second-order or minor symmetric fourth-order
+    tensor.
+
+    Parameters
+    ----------
+    a : np.ndarray
+        6D vector or 6x6 matrix in Voigt notation
+
+    Returns
+    -------
+    np.ndarray
+        Symmetric second-order tensor or minor symmetric fourth-order 
+        tensor.
+    """
+    if a.shape == (6,):
+        out = np.zeros(shape=[3, 3])
+        for i in range(3):
+            out[
+                tr.VN_CONVENTION[i][0],
+                tr.VN_CONVENTION[i][1]
+            ] = a[i]
+        for i in range(3, 6):
+            out[
+                tr.VN_CONVENTION[i][0],
+                tr.VN_CONVENTION[i][1]
+            ] = a[i]
+            out[
+                tr.VN_CONVENTION[i][1],
+                tr.VN_CONVENTION[i][0]
+            ] = a[i]
+    else:
+        out = np.zeros((3, 3, 3, 3))
+        for i_1 in range(6):
+            for i_2 in range(6):
+                temp = a[i_1, i_2]
+                out[
+                    tr.VN_CONVENTION[i_1][0],
+                    tr.VN_CONVENTION[i_1][1],
+                    tr.VN_CONVENTION[i_2][0],
+                    tr.VN_CONVENTION[i_2][1],
+                ] = temp
+                out[
+                    tr.VN_CONVENTION[i_1][1],
+                    tr.VN_CONVENTION[i_1][0],
+                    tr.VN_CONVENTION[i_2][0],
+                    tr.VN_CONVENTION[i_2][1],
+                ] = temp
+                out[
+                    tr.VN_CONVENTION[i_1][0],
+                    tr.VN_CONVENTION[i_1][1],
+                    tr.VN_CONVENTION[i_2][1],
+                    tr.VN_CONVENTION[i_2][0],
+                ] = temp
+                out[
+                    tr.VN_CONVENTION[i_1][1],
+                    tr.VN_CONVENTION[i_1][0],
+                    tr.VN_CONVENTION[i_2][1],
+                    tr.VN_CONVENTION[i_2][0],
+                ] = temp
     return out
 
 
@@ -612,7 +713,7 @@ def nvn_inv(a: np.ndarray) -> np.ndarray:
     -------
     np.ndarray
         * symmetric 3x3 second-order tensor
-        * minor symmetric 3x3x3x3x fourth-order tensor
+        * minor symmetric 3x3x3x3 fourth-order tensor
     """
     if a.shape == (6,):
         out = np.zeros(shape=[3, 3])
