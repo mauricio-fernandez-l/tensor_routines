@@ -35,20 +35,29 @@ VN_CONVENTION = []
 # %% Auxiliary routines
 
 
-def set_vn_convention(conv="original", info=False):
+def set_vn_convention(convention="original", info=False):
     global VN_CONVENTION
-    VN_CONVENTION = [list(pair) for pair in VN_CONVENTIONS[conv]]
+    VN_CONVENTION = [list(pair) for pair in VN_CONVENTIONS[convention]]
     if info:
-        print(f"Global convention for Voigt notation: {conv}")
+        print(f"Global index convention for Voigt notation: {convention}")
         print("[printing indices starting from 1]")
         print(np.array(VN_CONVENTION) + 1)
 
 
-def get_vn_convention(info=True):
+def get_vn_convention(convention: str = None):
+    if convention is None:
+        indices = VN_CONVENTION
+    else:
+        indices = VN_CONVENTIONS[convention]
+    return indices
+
+
+def get_vn_current_convention(info=True):
     if info:
         for k, v in VN_CONVENTIONS.items():
             if np.all(v == VN_CONVENTION):
-                print(f"Currently used Voigt notation: {k}")
+                print(
+                    f"Currently used index convention for Voigt notation: {k}")
                 print("[printing indices starting from 1]")
                 print(np.array(VN_CONVENTION) + 1)
     return VN_CONVENTION

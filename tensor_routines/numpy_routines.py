@@ -544,42 +544,48 @@ def iso_inv(a: np.ndarray) -> np.ndarray:
 
 # %% Voigt notation (not normalized)
 
-def vn(a: np.ndarray) -> np.ndarray:
+def vn(a: np.ndarray, convention: str = None) -> np.ndarray:
     """Voigt notation (based on convention of tr.VN_CONVENTION)
 
     Parameters
     ----------
     a : np.ndarray
         Second- or fourth-order tensor
+    convention : str
+        Index convention to be used
+            * None : use globally active convention
+            * "original" : use original convention
+            * "abaqus" : use abaqus convention
 
     Returns
     -------
     np.ndarray
         Corresponding first- or second-order output in Voigt notation
     """
+    convention = tr.get_vn_convention(convention)
     if a.shape == (3, 3):
         out = np.array([
-            a[tr.VN_CONVENTION[0][0], tr.VN_CONVENTION[0][1]],
-            a[tr.VN_CONVENTION[1][0], tr.VN_CONVENTION[1][1]],
-            a[tr.VN_CONVENTION[2][0], tr.VN_CONVENTION[2][1]],
-            a[tr.VN_CONVENTION[3][0], tr.VN_CONVENTION[3][1]],
-            a[tr.VN_CONVENTION[4][0], tr.VN_CONVENTION[4][1]],
-            a[tr.VN_CONVENTION[5][0], tr.VN_CONVENTION[5][1]]
+            a[convention[0][0], convention[0][1]],
+            a[convention[1][0], convention[1][1]],
+            a[convention[2][0], convention[2][1]],
+            a[convention[3][0], convention[3][1]],
+            a[convention[4][0], convention[4][1]],
+            a[convention[5][0], convention[5][1]]
         ])
     else:
         out = np.eye(6)
         for i_1 in range(6):
             for i_2 in range(6):
                 out[i_1, i_2] = a[
-                    tr.VN_CONVENTION[i_1][0],
-                    tr.VN_CONVENTION[i_1][1],
-                    tr.VN_CONVENTION[i_2][0],
-                    tr.VN_CONVENTION[i_2][1]
+                    convention[i_1][0],
+                    convention[i_1][1],
+                    convention[i_2][0],
+                    convention[i_2][1]
                 ]
     return out
 
 
-def vn_inv(a: np.ndarray) -> np.ndarray:
+def vn_inv(a: np.ndarray, convention: str = None) -> np.ndarray:
     """Inverse Voigt notation.
 
     Reconstruct symmetric second-order or minor symmetric fourth-order
@@ -589,28 +595,34 @@ def vn_inv(a: np.ndarray) -> np.ndarray:
     ----------
     a : np.ndarray
         6D vector or 6x6 matrix in Voigt notation
+    convention : str
+        Index convention to be used
+            * None : use globally active convention
+            * "original" : use original convention
+            * "abaqus" : use abaqus convention
 
     Returns
     -------
     np.ndarray
-        Symmetric second-order tensor or minor symmetric fourth-order 
+        Symmetric second-order tensor or minor symmetric fourth-order
         tensor.
     """
+    convention = tr.get_vn_convention(convention)
     if a.shape == (6,):
         out = np.zeros(shape=[3, 3])
         for i in range(3):
             out[
-                tr.VN_CONVENTION[i][0],
-                tr.VN_CONVENTION[i][1]
+                convention[i][0],
+                convention[i][1]
             ] = a[i]
         for i in range(3, 6):
             out[
-                tr.VN_CONVENTION[i][0],
-                tr.VN_CONVENTION[i][1]
+                convention[i][0],
+                convention[i][1]
             ] = a[i]
             out[
-                tr.VN_CONVENTION[i][1],
-                tr.VN_CONVENTION[i][0]
+                convention[i][1],
+                convention[i][0]
             ] = a[i]
     else:
         out = np.zeros((3, 3, 3, 3))
@@ -618,35 +630,35 @@ def vn_inv(a: np.ndarray) -> np.ndarray:
             for i_2 in range(6):
                 temp = a[i_1, i_2]
                 out[
-                    tr.VN_CONVENTION[i_1][0],
-                    tr.VN_CONVENTION[i_1][1],
-                    tr.VN_CONVENTION[i_2][0],
-                    tr.VN_CONVENTION[i_2][1],
+                    convention[i_1][0],
+                    convention[i_1][1],
+                    convention[i_2][0],
+                    convention[i_2][1],
                 ] = temp
                 out[
-                    tr.VN_CONVENTION[i_1][1],
-                    tr.VN_CONVENTION[i_1][0],
-                    tr.VN_CONVENTION[i_2][0],
-                    tr.VN_CONVENTION[i_2][1],
+                    convention[i_1][1],
+                    convention[i_1][0],
+                    convention[i_2][0],
+                    convention[i_2][1],
                 ] = temp
                 out[
-                    tr.VN_CONVENTION[i_1][0],
-                    tr.VN_CONVENTION[i_1][1],
-                    tr.VN_CONVENTION[i_2][1],
-                    tr.VN_CONVENTION[i_2][0],
+                    convention[i_1][0],
+                    convention[i_1][1],
+                    convention[i_2][1],
+                    convention[i_2][0],
                 ] = temp
                 out[
-                    tr.VN_CONVENTION[i_1][1],
-                    tr.VN_CONVENTION[i_1][0],
-                    tr.VN_CONVENTION[i_2][1],
-                    tr.VN_CONVENTION[i_2][0],
+                    convention[i_1][1],
+                    convention[i_1][0],
+                    convention[i_2][1],
+                    convention[i_2][0],
                 ] = temp
     return out
 
 
 # %% Normalized Voigt notation (NOT Voigt notation)
 
-def nvn(a: np.ndarray) -> np.ndarray:
+def nvn(a: np.ndarray, convention: str = None) -> np.ndarray:
     """Normalized Voigt notation.
 
     Return the symmetric second- or minor symmetric fourth-order tensor
@@ -664,6 +676,11 @@ def nvn(a: np.ndarray) -> np.ndarray:
         * Second order: a.shape == (3, 3) and symmetric
         * Fourth order: a.shape == (3, 3, 3, 3) and minor symmetric,
             i.e., a == sym_lr(a)
+    convention : str
+        Index convention to be used
+            * None : use globally active convention
+            * "original" : use original convention
+            * "abaqus" : use abaqus convention
 
     Returns
     -------
@@ -671,24 +688,25 @@ def nvn(a: np.ndarray) -> np.ndarray:
         * Second order: 6D vector representation
         * Fourth order: 6x6 matrix representation
     """
+    convention = tr.get_vn_convention(convention)
     if a.shape == (3, 3):
         out = np.array([
-            a[tr.VN_CONVENTION[0][0], tr.VN_CONVENTION[0][1]],
-            a[tr.VN_CONVENTION[1][0], tr.VN_CONVENTION[1][1]],
-            a[tr.VN_CONVENTION[2][0], tr.VN_CONVENTION[2][1]],
-            a[tr.VN_CONVENTION[3][0], tr.VN_CONVENTION[3][1]]*SR2,
-            a[tr.VN_CONVENTION[4][0], tr.VN_CONVENTION[4][1]]*SR2,
-            a[tr.VN_CONVENTION[5][0], tr.VN_CONVENTION[5][1]]*SR2
+            a[convention[0][0], convention[0][1]],
+            a[convention[1][0], convention[1][1]],
+            a[convention[2][0], convention[2][1]],
+            a[convention[3][0], convention[3][1]]*SR2,
+            a[convention[4][0], convention[4][1]]*SR2,
+            a[convention[5][0], convention[5][1]]*SR2
         ])
     else:
         out = np.eye(6)
         for i_1 in range(6):
             for i_2 in range(6):
                 out[i_1, i_2] = a[
-                    tr.VN_CONVENTION[i_1][0],
-                    tr.VN_CONVENTION[i_1][1],
-                    tr.VN_CONVENTION[i_2][0],
-                    tr.VN_CONVENTION[i_2][1]
+                    convention[i_1][0],
+                    convention[i_1][1],
+                    convention[i_2][0],
+                    convention[i_2][1]
                 ]
                 if i_1 > 2:
                     out[i_1, i_2] *= SR2
@@ -697,7 +715,7 @@ def nvn(a: np.ndarray) -> np.ndarray:
     return out
 
 
-def nvn_inv(a: np.ndarray) -> np.ndarray:
+def nvn_inv(a: np.ndarray, convention: str = None) -> np.ndarray:
     """Inverse of normalized Voigt notation.
 
     Reconstruct symmetric second- or minor symmetric fourth-order
@@ -708,6 +726,11 @@ def nvn_inv(a: np.ndarray) -> np.ndarray:
     a : np.ndarray
         * 6D vector
         * 6x6 second-order tensor
+    convention : str
+        Index convention to be used
+            * None : use globally active convention
+            * "original" : use original convention
+            * "abaqus" : use abaqus convention
 
     Returns
     -------
@@ -715,21 +738,22 @@ def nvn_inv(a: np.ndarray) -> np.ndarray:
         * symmetric 3x3 second-order tensor
         * minor symmetric 3x3x3x3 fourth-order tensor
     """
+    convention = tr.get_vn_convention(convention)
     if a.shape == (6,):
         out = np.zeros(shape=[3, 3])
         for i in range(3):
             out[
-                tr.VN_CONVENTION[i][0],
-                tr.VN_CONVENTION[i][1]
+                convention[i][0],
+                convention[i][1]
             ] = a[i]
         for i in range(3, 6):
             out[
-                tr.VN_CONVENTION[i][0],
-                tr.VN_CONVENTION[i][1]
+                convention[i][0],
+                convention[i][1]
             ] = a[i]/SR2
             out[
-                tr.VN_CONVENTION[i][1],
-                tr.VN_CONVENTION[i][0]
+                convention[i][1],
+                convention[i][0]
             ] = a[i]/SR2
     else:
         out = np.zeros((3, 3, 3, 3))
@@ -741,28 +765,28 @@ def nvn_inv(a: np.ndarray) -> np.ndarray:
                 if i_2 > 2:
                     temp /= SR2
                 out[
-                    tr.VN_CONVENTION[i_1][0],
-                    tr.VN_CONVENTION[i_1][1],
-                    tr.VN_CONVENTION[i_2][0],
-                    tr.VN_CONVENTION[i_2][1],
+                    convention[i_1][0],
+                    convention[i_1][1],
+                    convention[i_2][0],
+                    convention[i_2][1],
                 ] = temp
                 out[
-                    tr.VN_CONVENTION[i_1][1],
-                    tr.VN_CONVENTION[i_1][0],
-                    tr.VN_CONVENTION[i_2][0],
-                    tr.VN_CONVENTION[i_2][1],
+                    convention[i_1][1],
+                    convention[i_1][0],
+                    convention[i_2][0],
+                    convention[i_2][1],
                 ] = temp
                 out[
-                    tr.VN_CONVENTION[i_1][0],
-                    tr.VN_CONVENTION[i_1][1],
-                    tr.VN_CONVENTION[i_2][1],
-                    tr.VN_CONVENTION[i_2][0],
+                    convention[i_1][0],
+                    convention[i_1][1],
+                    convention[i_2][1],
+                    convention[i_2][0],
                 ] = temp
                 out[
-                    tr.VN_CONVENTION[i_1][1],
-                    tr.VN_CONVENTION[i_1][0],
-                    tr.VN_CONVENTION[i_2][1],
-                    tr.VN_CONVENTION[i_2][0],
+                    convention[i_1][1],
+                    convention[i_1][0],
+                    convention[i_2][1],
+                    convention[i_2][0],
                 ] = temp
     return out
 
@@ -830,7 +854,7 @@ def nv_spherical(theta: float, phi: float) -> np.ndarray:
 # %% T4: stiffness/compliance tensors of important symmetry groups
 
 
-def stiffness_component_dict(components=None) -> dict:
+def stiffness_component_dict(components=None, convention: str = None) -> dict:
     """Generate stiffness component dictionary
 
     Generate dictionary based on the 21 values passed
@@ -841,6 +865,11 @@ def stiffness_component_dict(components=None) -> dict:
     ----------
     components : float, optional
         The 21 components, by default None
+    convention : str
+        Index convention to be used from Voigt notation
+            * None : use globally active convention
+            * "original" : use original convention
+            * "abaqus" : use abaqus convention
 
     Returns
     -------
@@ -849,9 +878,10 @@ def stiffness_component_dict(components=None) -> dict:
     """
     out = {}
     counter = 0
+    convention = tr.get_vn_convention(convention)
     for i_1 in range(6):
         for i_2 in range(i_1, 6):
-            k = tr.VN_CONVENTION[i_1] + tr.VN_CONVENTION[i_2]
+            k = convention[i_1] + convention[i_2]
             k = np.array(k) + 1
             k = "".join(str(k_) for k_ in k)
             if not isinstance(components, type(None)):
