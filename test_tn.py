@@ -9,6 +9,7 @@ tol = 1e-13
 
 # %%
 
+
 def test_td():
     a = np.random.rand(2, 3, 4, 5)
     b = np.random.rand(4, 5, 6, 7)
@@ -37,7 +38,7 @@ def test_nf():
 def test_tp():
     a = np.random.rand(2, 3, 4)
     b = np.random.rand(7, 8, 9)
-    c = tn.tp(a, b) # c_ijkmno = a_ijk b_mno
+    c = tn.tp(a, b)  # c_ijkmno = a_ijk b_mno
     assert c.shape == (2, 3, 4, 7, 8, 9)
     assert tn.nf(c[0, 1, 2] - a[0, 1, 2]*b) < tol
     assert tn.tp(a, a, b).shape == (2, 3, 4, 2, 3, 4, 7, 8, 9)
@@ -64,7 +65,8 @@ def test_rp():
         for i1 in range(d_out):
             for i2 in range(d_out):
                 for i3 in range(d_out):
-                    b_[i0, i1, i2, i3] = tn.sp(tn.tp(q[i0], q[i1], q[i2], q[i3]), a)
+                    b_[i0, i1, i2, i3] = tn.sp(
+                        tn.tp(q[i0], q[i1], q[i2], q[i3]), a)
     assert tn.nf(b - b_)/tn.nf(b) < tol
 
 
@@ -100,7 +102,7 @@ def test_iso():
     a = tn.iso_t(ls)
     ai = tn.iso_inv(a)
     assert tn.nf(tn.td(a, ai, 2) - tn.ID_S)/tn.nf(tn.ID_S) < tol
-    
+
 
 def test_nvn():
     # Second order
@@ -128,12 +130,10 @@ def test_hex():
     a = tn.stiffness_hex(*np.random.random(5))
     for _ in range(100):
         Q = tn.rotation_matrix(
-            np.array([0, 0, 1]), 
+            np.array([0, 0, 1]),
             np.random.rand()*np.pi
-            )
+        )
         b = tn.rp(Q, a)
         if tn.nf(a - b)/tn.nf(a) >= tol:
-            break 
+            break
     assert tn.nf(a - b)/tn.nf(a) < tol
-
-

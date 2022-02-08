@@ -6,6 +6,7 @@ import tensor_routines.sympy_routines as ts
 
 # %%
 
+
 def test_nf():
     a = ts.t(3)
     assert spy.sqrt(ts.sp(a, a)) == ts.nf(a)
@@ -31,14 +32,14 @@ def test_rp():
     d_out = q.shape[0]
     zeros = spy.MutableDenseNDimArray(
         np.zeros([d_out]*a.rank(), dtype=int)
-        )
+    )
     temp_2 = spy.MutableDenseNDimArray(
         np.zeros([d_out]*a.rank(), dtype=int)
-        )
+    )
     for i0 in range(d_out):
         for i1 in range(d_out):
             for i2 in range(d_out):
-                    temp_2[i0, i1, i2] = ts.sp(ts.tp(q[i0], q[i1], q[i2]), a)
+                temp_2[i0, i1, i2] = ts.sp(ts.tp(q[i0], q[i1], q[i2]), a)
     assert spy.simplify(temp_1 - temp_2) == zeros
 
 
