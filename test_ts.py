@@ -16,26 +16,22 @@ def test_rp():
     # First order
     a = ts.t(1)
     q = ts.t(2, "q")
-    assert ts.rp(q, a).tomatrix() == q.tomatrix()*ts.vec(a)
+    assert ts.rp(q, a).tomatrix() == q.tomatrix() * ts.vec(a)
     # Second order
     a = ts.t(2)
     q = ts.t(2, "q")
     temp_1 = ts.rp(q, a).tomatrix()
     a = a.tomatrix()
     q = q.tomatrix()
-    temp_2 = q*a*spy.transpose(q)
+    temp_2 = q * a * spy.transpose(q)
     assert spy.simplify(temp_1 - temp_2) == spy.zeros(3, 3)
     # Higher order
     a = ts.t(2, "a", [2, 2, 2])
     q = ts.t(2, "q", [4, 2])
     temp_1 = ts.rp(q, a)
     d_out = q.shape[0]
-    zeros = spy.MutableDenseNDimArray(
-        np.zeros([d_out]*a.rank(), dtype=int)
-    )
-    temp_2 = spy.MutableDenseNDimArray(
-        np.zeros([d_out]*a.rank(), dtype=int)
-    )
+    zeros = spy.MutableDenseNDimArray(np.zeros([d_out] * a.rank(), dtype=int))
+    temp_2 = spy.MutableDenseNDimArray(np.zeros([d_out] * a.rank(), dtype=int))
     for i0 in range(d_out):
         for i1 in range(d_out):
             for i2 in range(d_out):
@@ -58,7 +54,7 @@ def test_nvn():
     a = ts.symmetrize_lr(ts.t(4))
     b = ts.symmetrize(ts.t(2, "b"))
     c = ts.lm(a, b)
-    check = spy.simplify(ts.nvn(c) - ts.nvn(a)*ts.nvn(b)) == spy.zeros(6, 1)
+    check = spy.simplify(ts.nvn(c) - ts.nvn(a) * ts.nvn(b)) == spy.zeros(6, 1)
     assert check
 
 
@@ -67,3 +63,12 @@ def test_grad():
     b = ts.t(2, "b")
     temp = ts.grad(ts.tp(a, b), b)
     assert temp == ts.tp(a, ts.ID_4)
+
+
+def test_diff():
+    v = ts.t(2, "v", [1, 2])
+    w = ts.t(2, "w", [3, 4])
+    a = ts.tp(v, w) * ts.nf(v)
+    g_1 = ts.grad(ts.grad(a, w), v)
+    g_2 = ts.diff(a, w, v)
+    assert g_1 == g_2
